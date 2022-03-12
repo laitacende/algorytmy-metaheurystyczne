@@ -2,13 +2,14 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import structures.Graph;
 import utils.CostFunction;
+import utils.GraphType;
 
 import java.util.ArrayList;
 
 public class CostFunctionTest {
     @Test
     public void test1() {
-        Graph g = new Graph(4);
+        Graph g = new Graph(4, GraphType.FULL_MATRIX);
         g.addEdge(1, 2, 1.0);
         g.addEdge(1, 3, 2.0);
         g.addEdge(1, 4, 4.0);
