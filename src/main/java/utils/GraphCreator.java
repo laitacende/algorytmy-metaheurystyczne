@@ -70,7 +70,7 @@ public class GraphCreator {
                     Double r1 = (double) g.coordinates[i].x - g.coordinates[j].x;
                     Double r2 = (double) g.coordinates[i].y - g.coordinates[j].y;
                     //System.out.println(r1 + " " + r2);
-                    Double d = Math.sqrt(r1 * r1 + r2 * r2);
+                    Double d = (double) Math.round(Math.sqrt(r1 * r1 + r2 * r2)); // round to the nearest int
                     g.addEdge(i, j, d);
                     g.addEdge(j, i, d);
                 }
