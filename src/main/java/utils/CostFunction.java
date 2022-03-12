@@ -1,8 +1,9 @@
 package utils;
 
 import structures.Graph;
-
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class CostFunction {
 
@@ -17,5 +18,23 @@ public class CostFunction {
             }
         }
         return sum;
+    }
+
+    // checks if cycle is valid in TSP
+    public static boolean isAllowedCycle(List<Integer> cycle, Graph g) {
+        boolean isAllowedCycle = true;
+
+        // checking the cycle size
+        if (cycle.size() != g.getSize() - 1) {
+            isAllowedCycle = false;
+        }
+
+        // checking if there are duplicates
+        Set<Integer> set = new HashSet<>(cycle);
+        if(set.size() < cycle.size()) {
+            isAllowedCycle = false;
+        }
+
+        return isAllowedCycle;
     }
 }

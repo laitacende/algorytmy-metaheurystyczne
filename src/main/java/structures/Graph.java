@@ -21,7 +21,8 @@ public class Graph {
     public void printAdjacencyMatrix() {
         for (int i = 1; i < adjacencyMatrix.length; i++) {
             for (int j = 1; j < adjacencyMatrix.length; j++) {
-                System.out.print(String.format("%6s", String.format("%.2f", adjacencyMatrix[i][j])));
+
+               System.out.printf("%6s", String.format("%.2f", adjacencyMatrix[i][j]));
             }
             System.out.println();
         }
