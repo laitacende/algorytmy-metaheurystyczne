@@ -73,9 +73,10 @@ public class GraphCreator {
         BufferedReader reader = new BufferedReader(new FileReader(fileName));
 
         int size = 0;
+        String graphType = "";
         String[] data;
 
-        // gathering graph size
+        // gathering graph data
         do {
             data = reader.readLine().replaceAll("\\s", "").split(":");
 
@@ -86,28 +87,65 @@ public class GraphCreator {
                     return null;
                 }
             }
-        } while (!data[0].equals("NODE_COORD_SECTION"));
+            if (data[0].equals("EDGE_WEIGHT_TYPE")) {
+                graphType = data[1];
+            }
+
+        } while (!(data[0].equals("NODE_COORD_SECTION") || data[0].equals("EDGE_WEIGHT_SECTION")));
         data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
 
+        Graph g;
+        switch (graphType) {
+            case "EUC_2D" -> {
+                g = new Graph(size, GraphType.EUC_2D);
 
-        Graph g = new Graph(size, GraphType.EUC_2D);
-        Integer[] coordinatesX = new Integer[g.getSize()];
-        Integer[] coordinatesY = new Integer[g.getSize()];
+                // gathering coordinates
+                int i = 1;
+                while (!data[0].equals("EOF")) {
+                    g.coordinates[i] = new Coordinates(Integer.parseInt(data[1]), Integer.parseInt(data[2]));
 
-        // gathering coordinates
-        int i = 1;
-        while (!data[0].equals("EOF")) {
-            g.coordinates[i] = new Coordinates(Integer.parseInt(data[1]), Integer.parseInt(data[2]));
+                    data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
+                    i++;
+                }
 
-            data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
-            i++;
+                // calculate euclidean distances and fill the graph
+                fillTheGraph(g);
+                reader.close();
+                return g;
+            }
+            case "FULL_MATRIX" -> {
+                g = new Graph(size, GraphType.UPPER_ROW);
+
+                int i = 1;
+                while (!data[0].equals("EOF")) {
+
+                    for (int j = 1; j < g.getSize(); j++) {
+                        if (i == j) {
+                            g.addEdge(i, j, -1.0);
+                        }
+                        else {
+                            g.addEdge(i, j, Double.parseDouble(data[j - 1]));
+                        }
+                    }
+                    data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
+                    i++;
+                }
+                return g;
+            }
+            case "UPPER_ROW" -> {
+                g = new Graph(size, GraphType.FULL_MATRIX);
+
+                int i = 1;
+                while (!data[0].equals("EOF")) {
+
+                    data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
+                    i++;
+                }
+                return g;
+            }
         }
 
-        // calculate euclidean distances and fill the graph
-        fillTheGraph(g);
-        reader.close();
-
-        return g;
+        return null;
     }
 
     static void fillTheGraph(Graph g) {
