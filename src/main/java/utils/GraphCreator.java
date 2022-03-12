@@ -1,6 +1,7 @@
 package utils;
 
 import org.apache.commons.math3.random.MersenneTwister;
+import structures.Coordinates;
 import structures.Graph;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -12,7 +13,7 @@ public class GraphCreator {
     // to obtain directed graph with random distances
     public static Graph randomFullMatrix(Integer vNo, Integer bound) {
         MersenneTwister mt = new MersenneTwister();
-        Graph g = new Graph(vNo);
+        Graph g = new Graph(vNo, GraphType.FULL_MATRIX);
         for (int i = 1; i < g.getSize(); i++) {
             for (int j = 1; j < g.getSize(); j++) {
                 if (i == j) {
@@ -32,7 +33,7 @@ public class GraphCreator {
     // to obtain undirected graph with random distances
     public static Graph randomSymmetric(Integer vNo, Integer bound) {
         MersenneTwister mt = new MersenneTwister();
-        Graph g = new Graph(vNo);
+        Graph g = new Graph(vNo, GraphType.UPPER_ROW);
         for (int i = 1; i < g.getSize(); i++) {
             for (int j = 1; j < g.getSize(); j++) {
                 if (i == j) {
@@ -54,19 +55,15 @@ public class GraphCreator {
     // here bound is for x, y coordinates
     public static Graph randomEuclidean(Integer vNo, Integer bound) {
         MersenneTwister mt = new MersenneTwister();
-        Graph g = new Graph(vNo);
-        Integer[] coordinatesX = new Integer[g.getSize()];
-        Integer[] coordinatesY = new Integer[g.getSize()];
-
+        Graph g = new Graph(vNo, GraphType.EUC_2D);
+//
         // get random coordinates
         for (int i = 1; i < vNo + 1; i++) {
-            coordinatesX[i] = mt.nextInt(bound);
-            coordinatesY[i] = mt.nextInt(bound);
+            g.coordinates[i] = new Coordinates(mt.nextInt(bound), mt.nextInt(bound));
 
-            // System.out.println(i + " x: " + coordinatesX[i] + " y: " + coordinatesY[i]);
         }
         // calculate euclidean distances (symmetric matrix)
-        fillTheGraph(g, coordinatesX, coordinatesY);
+        fillTheGraph(g);
 
         return g;
     }
@@ -93,28 +90,27 @@ public class GraphCreator {
         data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
 
 
-        Graph g = new Graph(size);
+        Graph g = new Graph(size, GraphType.EUC_2D);
         Integer[] coordinatesX = new Integer[g.getSize()];
         Integer[] coordinatesY = new Integer[g.getSize()];
 
         // gathering coordinates
         int i = 1;
         while (!data[0].equals("EOF")) {
-            coordinatesX[i] = Integer.parseInt(data[1]);
-            coordinatesY[i] = Integer.parseInt(data[2]);
+            g.coordinates[i] = new Coordinates(Integer.parseInt(data[1]), Integer.parseInt(data[2]));
 
             data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
             i++;
         }
 
         // calculate euclidean distances and fill the graph
-        fillTheGraph(g, coordinatesX, coordinatesY);
+        fillTheGraph(g);
         reader.close();
 
         return g;
     }
 
-    static void fillTheGraph(Graph g, Integer[] coordinatesX, Integer[] coordinatesY) {
+    static void fillTheGraph(Graph g) {
         for (int i = 1; i < g.getSize(); i++) {
             for (int j = 1; j < g.getSize(); j++) {
                 //System.out.println(i + " " + j);
@@ -123,8 +119,8 @@ public class GraphCreator {
                 }
                 else if (i > j) {
                     // calculate distance
-                    Double r1 = (double) coordinatesX[i] - coordinatesX[j];
-                    Double r2 = (double) coordinatesY[i] - coordinatesY[j];
+                    Double r1 = (double) g.coordinates[i].x - g.coordinates[j].x;
+                    Double r2 = (double) g.coordinates[i].y - g.coordinates[j].y;
                     //System.out.println(r1 + " " + r2);
                     Double d = Math.sqrt(r1 * r1 + r2 * r2);
                     g.addEdge(i, j, d);
