@@ -45,6 +45,7 @@ public class Graph {
         return vNo;
     }
 
+    // TODO change dumping matrix to file
     public void dumpToFile(String fileName) {
         File file = new File(fileName);
         FileWriter fileWriter =  null;
