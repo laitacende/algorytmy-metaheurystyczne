@@ -31,6 +31,7 @@ public class NearestNeighbour {
             }
             tour.add(minNode);
             current = minNode;
+            visited[current] = true;
         }
 
         return tour;

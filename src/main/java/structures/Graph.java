@@ -45,7 +45,6 @@ public class Graph {
         return vNo;
     }
 
-    // TODO change dumping matrix to file
     public void dumpToFile(String fileName) {
         File file = new File(fileName);
         FileWriter fileWriter =  null;
@@ -73,8 +72,8 @@ public class Graph {
                     }
                 } else { // symmetric
                     for (int i = 1; i < vNo; i++) {
-                        for (int j = vNo - 1; j > i; j--) {
-                            if (j == i + 1) {
+                        for (int j = i + 1; j < vNo; j++) {
+                            if (j == vNo - 1) {
                                 fileWriter.write(getEdge(i, j).toString() + "\n");
                             } else {
                                 fileWriter.write(getEdge(i, j).toString() + " ");
