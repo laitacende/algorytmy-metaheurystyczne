@@ -27,14 +27,14 @@ public class TwoOPT {
         while (improved) {
             newDistanceBest = Double.MAX_VALUE;
             // invert
-            for (int i = 1; i < g.vNo - 1; i++) { // don't consider the last node - there is nothing to invert
-                for (int j = i + 1; j < g.vNo; j++) { // check from position 'onwards'
+            for (int i = 0; i < g.vNo - 2; i++) { // don't consider the last node - there is nothing to invert
+                for (int j = i + 1; j < g.vNo - 1; j++) { // check from position 'onwards'
                     // change i and j and reverse everything between them
                     newPermutation = new ArrayList<>(currentPermutation);
 
                     // reverse
                     for (int k = 0; k <= j - i; k++) {
-                        newPermutation.set(i + k - 1, currentPermutation.get(j - k - 1));
+                        newPermutation.set(i + k, currentPermutation.get(j - k));
                     }
 
                     // calculate distance
