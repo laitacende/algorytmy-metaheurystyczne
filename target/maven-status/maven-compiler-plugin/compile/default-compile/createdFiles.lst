@@ -1,4 +1,9 @@
-utils\CostFunction.class
 Main.class
-structures\Coordinates.class
-utils\GraphType.class
+utils/GraphType.class
+utils/CostFunction.class
+algorithms/ExtendedNearestNeighbour.class
+structures/Coordinates.class
+structures/Graph.class
+algorithms/NearestNeighbour.class
+algorithms/TwoOPT.class
+utils/GraphCreator.class

@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TwoOPT {
-    public static List<Integer> TwoOpt(Graph g) {
+    public static List<Integer> twoOpt(Graph g) {
         List<Integer> currentPermutation = new ArrayList<>();
         List<Integer> newPermutation;
         Double currentDistance;

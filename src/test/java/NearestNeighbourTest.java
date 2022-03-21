@@ -16,7 +16,7 @@ public class NearestNeighbourTest {
 
         g.printAdjacencyMatrix();
         List<Integer> tour = NearestNeighbour.nearestNeighbour(g, 1);
-        List<Integer> tour2 = TwoOPT.TwoOpt(g);
+        List<Integer> tour2 = TwoOPT.twoOpt(g);
         List<Integer> tour3 = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
 
 

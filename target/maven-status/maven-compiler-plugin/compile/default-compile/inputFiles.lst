@@ -1,3 +1,9 @@
 /home/ola/shared/am/algorytmy-metaheurystyczne/src/main/java/Main.java
+/home/ola/shared/am/algorytmy-metaheurystyczne/src/main/java/algorithms/ExtendedNearestNeighbour.java
+/home/ola/shared/am/algorytmy-metaheurystyczne/src/main/java/structures/Coordinates.java
+/home/ola/shared/am/algorytmy-metaheurystyczne/src/main/java/utils/CostFunction.java
 /home/ola/shared/am/algorytmy-metaheurystyczne/src/main/java/utils/GraphCreator.java
+/home/ola/shared/am/algorytmy-metaheurystyczne/src/main/java/utils/GraphType.java
+/home/ola/shared/am/algorytmy-metaheurystyczne/src/main/java/algorithms/TwoOPT.java
 /home/ola/shared/am/algorytmy-metaheurystyczne/src/main/java/structures/Graph.java
+/home/ola/shared/am/algorytmy-metaheurystyczne/src/main/java/algorithms/NearestNeighbour.java
