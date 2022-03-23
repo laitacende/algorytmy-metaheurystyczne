@@ -30,6 +30,16 @@ public class Graph {
         return adjacencyMatrix[source][destination];
     }
 
+    public void addDiagonalValues() {
+        for (int i = 1; i < adjacencyMatrix.length; i++) {
+            for (int j = 1; j < adjacencyMatrix.length; j++) {
+                if (i == j) {
+                    this.addEdge(i, j, -1.0);
+                }
+            }
+        }
+    }
+
     public void printAdjacencyMatrix() {
         for (int i = 1; i < adjacencyMatrix.length; i++) {
             for (int j = 1; j < adjacencyMatrix.length; j++) {
@@ -46,7 +56,7 @@ public class Graph {
     }
 
     public void dumpToFile(String fileName) {
-        File file = new File(fileName);
+        File file = new File("src\\main\\java\\samples\\" + fileName);
         FileWriter fileWriter =  null;
         try {
             fileWriter = new FileWriter(file);

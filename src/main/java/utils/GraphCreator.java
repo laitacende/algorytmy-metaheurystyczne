@@ -118,7 +118,6 @@ public class GraphCreator {
 
                 int i = 1;
                 while (!data[0].equals("EOF")) {
-
                     for (int j = 1; j < g.getSize(); j++) {
                         if (i == j) {
                             g.addEdge(i, j, -1.0);
@@ -134,15 +133,24 @@ public class GraphCreator {
             }
             case "UPPER_ROW" -> {
                 g = new Graph(size, GraphType.FULL_MATRIX);
+                g.addEdge(1, 1, -1.0);
 
-                int i = 1;
+                int i = 2;
                 while (!data[0].equals("EOF")) {
-
+                    for (int j = 1; j <= i; j++) {
+                        if (i == j) {
+                            g.addEdge(i, j, -1.0);
+                        } else {
+                            g.addEdge(i, j, Double.parseDouble(data[j - 1]));
+                            g.addEdge(j, i, Double.parseDouble(data[j - 1]));
+                        }
+                    }
                     data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
                     i++;
                 }
                 return g;
             }
+            //TODO can provide cases for other available types (only most common are here)
         }
 
         return null;
