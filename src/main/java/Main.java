@@ -1,4 +1,5 @@
 import algorithms.ExtendedNearestNeighbour;
+import algorithms.KRandom;
 import algorithms.NearestNeighbour;
 import algorithms.TwoOPT;
 import structures.Graph;
@@ -41,7 +42,9 @@ public class Main {
             if (g != null) {
                 // run algorithms on this graph and print the results
                 List<Integer> tour;
-                // TODO add k random
+                tour = KRandom.kRandom(10000, g);
+                System.out.println("Solution found by k-random algorithm: " + tour + "\ncost: " + CostFunction.calcCostFunction(tour, g));
+
                 tour = NearestNeighbour.nearestNeighbour(g, 1);
                 System.out.println("Solution found by the nearest neighbour algorithm: " + tour + "\ncost: " + CostFunction.calcCostFunction(tour, g));
 
