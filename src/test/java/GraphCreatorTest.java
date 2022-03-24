@@ -31,15 +31,15 @@ public class GraphCreatorTest {
 
     @Test
     public void fromFile() throws IOException {
-        Graph g = GraphCreator.randomEuclidean(5, 10);
-        g.dumpToFile("from_file.txt");
-
-        Graph g2 = GraphCreator.fromFile("src\\main\\java\\samples\\from_file.txt");
-        assert g2 != null;
-
-        g.printAdjacencyMatrix();
-        System.out.println();
-        System.out.println();
-        g2.printAdjacencyMatrix();
+//        Graph g = GraphCreator.randomEuclidean(5, 10);
+//        g.dumpToFile("from_file.txt");
+//
+//        Graph g2 = GraphCreator.fromFile("src\\main\\java\\samples\\from_file.txt");
+//        assert g2 != null;
+//
+//        g.printAdjacencyMatrix();
+//        System.out.println();
+//        System.out.println();
+//        g2.printAdjacencyMatrix();
     }
 }

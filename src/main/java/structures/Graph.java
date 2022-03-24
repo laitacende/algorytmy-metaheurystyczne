@@ -56,7 +56,8 @@ public class Graph {
     }
 
     public void dumpToFile(String fileName) {
-        File file = new File("src\\main\\java\\samples\\" + fileName);
+       // File file = new File("src\\main\\java\\samples\\" + fileName);
+        File file = new File(fileName);
         FileWriter fileWriter =  null;
         try {
             fileWriter = new FileWriter(file);

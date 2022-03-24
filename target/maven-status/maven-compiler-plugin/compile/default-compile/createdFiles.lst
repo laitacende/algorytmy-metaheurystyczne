@@ -7,3 +7,4 @@ structures/Graph.class
 algorithms/NearestNeighbour.class
 algorithms/TwoOPT.class
 utils/GraphCreator.class
+algorithms/KRandom.class

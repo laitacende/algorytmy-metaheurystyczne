@@ -12,15 +12,70 @@ import java.io.IOException;
 import java.util.List;
 
 public class Main {
-    //TODO find relation for k random
-    public static void testK() {
-        for (int i = 0; i < 500; i++) {
 
+    public static void testK() {
+        Graph g = null;
+        int vNo = 10;
+        while (vNo <= 500) {
+            int i = 1;
+            while (i <= 10) {
+                System.out.println("i: " + i);
+                g = GraphCreator.randomFullMatrix(vNo, 100);
+                g.dumpToFile("testk_" + vNo + "_" + i);
+                i++;
+            }
+
+            vNo += 10;
+        }
+        File file = new File("results_k.txt");
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(file);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        long avg = 0;
+        long timeAvg = 0;
+        vNo = 10;
+        int i = 1;
+        while (i <= 50) {
+            System.out.println("i: " + i);
+            avg = 0;
+            timeAvg = 0;
+            vNo = 10;
+            while (vNo <= 200) {
+                System.out.println("vNo: " + vNo);
+                for (int j = 1; j <= 10; j++) {
+                    try {
+                        g = GraphCreator.fromFile("testk_" + vNo + "_" + j);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    long startTime = System.currentTimeMillis();
+                    List<Integer> c = KRandom.kRandom(g.vNo * 10 * i, g);
+                    timeAvg += System.currentTimeMillis() - startTime;
+                    double cost = CostFunction.calcCostFunction(c, g);
+                    avg += cost;
+                }
+                vNo += 10;
+            }
+            try {
+                fileWriter.write(i + " " + avg + " " + timeAvg + "\n");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            i++;
+        }
+        try {
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
 
     public static void testFromFile() {
+        // tsp and atsp
         File dir = new File("../tsp");
         String[] fileList = dir.list();
         File file = new File("results_tsp.txt");
@@ -90,6 +145,11 @@ public class Main {
                 }
            }
        }
+        try {
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void main(String[] args) {
