@@ -104,4 +104,16 @@ public class Graph {
             System.out.println(i + " x: " + coordinates[i].x + " y: " + coordinates[i].y);
         }
     }
+
+    public double findAverageDistance() {
+        double avg = 0.0;
+        for (int i = 1; i < vNo; i++) {
+           for (int j = 1; j < vNo; j++) {
+               if ( i != j) {
+                   avg += adjacencyMatrix[i][j];
+               }
+           }
+        }
+        return avg / (vNo * vNo);
+    }
 }
