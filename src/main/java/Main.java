@@ -5,7 +5,7 @@ import algorithms.TwoOPT;
 import structures.Graph;
 import utils.CostFunction;
 import utils.GraphCreator;
-
+import utils.GraphType;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -60,6 +60,7 @@ public class Main {
                 vNo += 10;
             }
             try {
+                assert fileWriter != null;
                 fileWriter.write(i + " " + avg + " " + timeAvg + "\n");
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -80,7 +81,7 @@ public class Main {
         String[] fileList = dir.list();
         File file = new File("results_tsp.txt");
         FileWriter fileWriter =  null;
-        
+
         try {
             fileWriter = new FileWriter(file);
         } catch (IOException e) {
@@ -90,50 +91,50 @@ public class Main {
         Graph g;
         List<Integer> tour;
         if (fileList != null) {
-           for(String fileName : fileList) {
-               try {
-                   g = GraphCreator.fromFile("../tsp/" + fileName);
-               } catch (IOException e) {
-                   e.printStackTrace();
-                   continue;
-               }
-               // test algorithms
-               double costKRand = 0;
-               double costNeighbour = 0;
-               double costExtended = 0;
-               double costOPT = 0;
+            for(String fileName : fileList) {
+                try {
+                    g = GraphCreator.fromFile("../tsp/" + fileName);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+                // test algorithms
+                double costKRand = 0;
+                double costNeighbour = 0;
+                double costExtended = 0;
+                double costOPT = 0;
 
-               long timeKRand = 0;
-               long timeNeighbour = 0;
-               long timeExtended = 0;
-               long timeOPT = 0;
+                long timeKRand = 0;
+                long timeNeighbour = 0;
+                long timeExtended = 0;
+                long timeOPT = 0;
 
-               assert g != null;
-               long startTime = System.currentTimeMillis();
-               tour = KRandom.kRandom(g.vNo * 100, g);
-               costKRand = CostFunction.calcCostFunction(tour, g);
-               timeKRand = System.currentTimeMillis() - startTime;
+                assert g != null;
+                long startTime = System.currentTimeMillis();
+                tour = KRandom.kRandom(g.vNo * 100, g);
+                costKRand = CostFunction.calcCostFunction(tour, g);
+                timeKRand = System.currentTimeMillis() - startTime;
 
-               startTime = System.currentTimeMillis();
-               tour = NearestNeighbour.nearestNeighbour(g, 1);
-               costNeighbour = CostFunction.calcCostFunction(tour, g);
-               timeNeighbour = System.currentTimeMillis() - startTime;
+                startTime = System.currentTimeMillis();
+                tour = NearestNeighbour.nearestNeighbour(g, 1);
+                costNeighbour = CostFunction.calcCostFunction(tour, g);
+                timeNeighbour = System.currentTimeMillis() - startTime;
 
-               startTime = System.currentTimeMillis();
-               tour = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
-               costExtended = CostFunction.calcCostFunction(tour, g);
-               timeExtended = System.currentTimeMillis() - startTime;
+                startTime = System.currentTimeMillis();
+                tour = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
+                costExtended = CostFunction.calcCostFunction(tour, g);
+                timeExtended = System.currentTimeMillis() - startTime;
 
-               startTime = System.currentTimeMillis();
-               tour = TwoOPT.twoOpt(g);
-               costOPT = CostFunction.calcCostFunction(tour, g);
-               timeOPT = System.currentTimeMillis() - startTime;
+                startTime = System.currentTimeMillis();
+                tour = TwoOPT.twoOpt(g);
+                costOPT = CostFunction.calcCostFunction(tour, g);
+                timeOPT = System.currentTimeMillis() - startTime;
 
-               // find optimum (if there is available) TODO
+                // find optimum (if there is available) TODO
 
 
 
-               try {
+                try {
                     fileWriter.write(fileName + " " + g.vNo + " " +
                             costKRand + " " + timeKRand + " " +
                             costNeighbour + " " + timeNeighbour + " " +
@@ -143,12 +144,90 @@ public class Main {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-           }
-       }
+            }
+        }
         try {
             fileWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public static void testForRandom(String fileName, GraphType type, int bound, int start, int end, int increment) {
+        File file = new File(fileName);
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Graph graph = null;
+        List<Integer> solution;
+        Double costKRand;
+        Double costNearestNeighbour;
+        Double costExtendedNN;
+        Double costOPT;
+        Double costCurrentBest;
+
+        int K_OPTIMAL_MULTIPLIER = 350;
+        long startTime;
+        long timeKRand;
+        long timeNearestNeighbour;
+        long timeExtendedNN;
+        long timeOPT;
+
+        int vNo = start;
+        while (vNo < end) {
+            switch (type) {
+                case EUC_2D -> graph = GraphCreator.randomEuclidean(vNo, bound);
+                case UPPER_ROW -> graph = GraphCreator.randomSymmetric(vNo, bound);
+                case FULL_MATRIX -> graph = GraphCreator.randomFullMatrix(vNo, bound);
+            }
+            assert graph != null;
+            startTime = System.currentTimeMillis();
+            solution = KRandom.kRandom((K_OPTIMAL_MULTIPLIER * vNo), graph);
+            timeKRand = System.currentTimeMillis() - startTime; // time in milliseconds
+            costCurrentBest = costKRand = CostFunction.calcCostFunction(solution, graph);
+
+            startTime = System.currentTimeMillis();
+            solution = NearestNeighbour.nearestNeighbour(graph, 1);
+            timeNearestNeighbour = System.currentTimeMillis() - startTime; // time in milliseconds
+            costNearestNeighbour =  CostFunction.calcCostFunction(solution, graph);
+            if (costNearestNeighbour > costCurrentBest) {
+                costCurrentBest = costNearestNeighbour;
+            }
+
+            startTime = System.currentTimeMillis();
+            solution = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
+            timeExtendedNN = System.currentTimeMillis() - startTime; // time in milliseconds
+            costExtendedNN = CostFunction.calcCostFunction(solution, graph);
+            if (costExtendedNN > costCurrentBest) {
+                costCurrentBest = costExtendedNN;
+            }
+
+            startTime = System.currentTimeMillis();
+            solution = TwoOPT.twoOpt(graph);
+            timeOPT = System.currentTimeMillis() - startTime; // time in milliseconds
+            costOPT = CostFunction.calcCostFunction(solution, graph);
+            if (costOPT > costCurrentBest) {
+                costCurrentBest = costOPT;
+            }
+
+            assert fileWriter != null;
+            try {
+                fileWriter.write(fileName + " " + graph.vNo + " " +
+                        costKRand + " " + timeKRand + " " + ((costKRand - costCurrentBest) / costCurrentBest) + " " +
+                        costNearestNeighbour + " " + timeNearestNeighbour + " " + ((costNearestNeighbour - costCurrentBest) / costCurrentBest) + " " +
+                        costExtendedNN + " " + timeExtendedNN + " " + ((costExtendedNN - costCurrentBest) / costCurrentBest) + " " +
+                        costOPT + " " + timeOPT + " " + ((costExtendedNN - costCurrentBest) / costCurrentBest) + " " +
+                        costCurrentBest + " " +
+                        graph.findAverageDistance() + "\n");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            vNo += increment;
         }
     }
 

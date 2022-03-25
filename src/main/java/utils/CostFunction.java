@@ -1,9 +1,9 @@
 package utils;
-
 import structures.Graph;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.*;
 
 public class CostFunction {
 
@@ -18,6 +18,24 @@ public class CostFunction {
             }
         }
         return sum;
+    }
+
+    public static HashMap<String, Integer> getSolutionsFromFile(String fileName) throws IOException {
+        HashMap<String, Integer> solutions = new HashMap<>();
+        BufferedReader reader = new BufferedReader(new FileReader(fileName));
+        String[] data;
+        String name;
+        int value;
+        data = reader.readLine().replaceAll("\\s+", "").split(":");
+
+        while (!(data[0].equals("EOF"))){
+            name = data[0];
+            value = Integer.parseInt(data[1]);
+            solutions.put(name, value);
+            data = reader.readLine().replaceAll("\\s+", "").split(":");
+        }
+        reader.close();
+        return solutions;
     }
 
     // checks if cycle is valid in TSP
