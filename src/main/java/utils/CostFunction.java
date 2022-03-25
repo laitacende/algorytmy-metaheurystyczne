@@ -23,16 +23,16 @@ public class CostFunction {
     public static HashMap<String, Integer> getSolutionsFromFile(String fileName) throws IOException {
         HashMap<String, Integer> solutions = new HashMap<>();
         BufferedReader reader = new BufferedReader(new FileReader(fileName));
-        String[] data;
         String name;
         int value;
-        data = reader.readLine().replaceAll("\\s+", "").split(":");
 
-        while (!(data[0].equals("EOF"))){
+        String[] data;
+        String line;
+        while ((line = reader.readLine()) != null){
+            data = line.replaceAll("\\s+", "").split(":");
             name = data[0];
             value = Integer.parseInt(data[1]);
             solutions.put(name, value);
-            data = reader.readLine().replaceAll("\\s+", "").split(":");
         }
         reader.close();
         return solutions;
