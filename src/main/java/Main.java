@@ -158,126 +158,194 @@ public class Main {
         FileWriter fileWriter = null;
         try {
             fileWriter = new FileWriter(file);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
         }
 
+        int K_OPTIMAL_MULTIPLIER = 350;
+
         Graph graph = null;
         List<Integer> solution;
-        Double costKRand;
-        Double costNearestNeighbour;
-        Double costExtendedNN;
-        Double costOPT;
-        Double costCurrentBest;
+        double costKRand;
+        double costNearestNeighbour;
+        double costExtendedNN;
+        double costOPT;
+        double costCurrentBest = 0.0;
+        double avgBestCost = 0.0;
+        double avgDistance = 0.0;
 
-        int K_OPTIMAL_MULTIPLIER = 350;
+        double avgCostKRand = 0.0;
+        double avgCostNearestNeighbour = 0.0;
+        double avgCostExtendedNN = 0.0;
+        double avgCostOPT = 0.0;
+
+        double avgDeviationKRand = 0.0;
+        double avgDeviationNearestNeighbour = 0.0;
+        double avgDeviationExtendedNN = 0.0;
+        double avgDeviationOPT = 0.0;
+
         long startTime;
-        long timeKRand;
-        long timeNearestNeighbour;
-        long timeExtendedNN;
-        long timeOPT;
+        long avgTimeKRand = 0;
+        long avgTimeNearestNeighbour = 0;
+        long avgTimeExtendedNN = 0;
+        long avgTimeOPT = 0;
 
+        int configTestsNo = 5;
         int vNo = start;
         while (vNo < end) {
-            switch (type) {
-                case EUC_2D -> graph = GraphCreator.randomEuclidean(vNo, bound);
-                case UPPER_ROW -> graph = GraphCreator.randomSymmetric(vNo, bound);
-                case FULL_MATRIX -> graph = GraphCreator.randomFullMatrix(vNo, bound);
-            }
-            assert graph != null;
-            startTime = System.currentTimeMillis();
-            solution = KRandom.kRandom((K_OPTIMAL_MULTIPLIER * vNo), graph);
-            timeKRand = System.currentTimeMillis() - startTime; // time in milliseconds
-            costCurrentBest = costKRand = CostFunction.calcCostFunction(solution, graph);
+            for (int i = 0; i < configTestsNo; i++) {
+                switch (type) {
+                    case EUC_2D -> graph = GraphCreator.randomEuclidean(vNo, bound);
+                    case UPPER_ROW -> graph = GraphCreator.randomSymmetric(vNo, bound);
+                    case FULL_MATRIX -> graph = GraphCreator.randomFullMatrix(vNo, bound);
+                }
+                assert graph != null;
+                startTime = System.currentTimeMillis();
+                solution = KRandom.kRandom((K_OPTIMAL_MULTIPLIER * vNo), graph);
+                avgTimeKRand += System.currentTimeMillis() - startTime; // time in milliseconds
+                costKRand = CostFunction.calcCostFunction(solution, graph);
+                avgCostKRand += costKRand;
+                costCurrentBest = costKRand;
 
-            startTime = System.currentTimeMillis();
-            solution = NearestNeighbour.nearestNeighbour(graph, 1);
-            timeNearestNeighbour = System.currentTimeMillis() - startTime; // time in milliseconds
-            costNearestNeighbour =  CostFunction.calcCostFunction(solution, graph);
-            if (costNearestNeighbour > costCurrentBest) {
-                costCurrentBest = costNearestNeighbour;
-            }
+                startTime = System.currentTimeMillis();
+                solution = NearestNeighbour.nearestNeighbour(graph, 1);
+                avgTimeNearestNeighbour += System.currentTimeMillis() - startTime; // time in milliseconds
+                costNearestNeighbour = CostFunction.calcCostFunction(solution, graph);
+                avgCostNearestNeighbour += costNearestNeighbour;
+                if (costNearestNeighbour < costCurrentBest) { costCurrentBest = costNearestNeighbour; }
 
-            startTime = System.currentTimeMillis();
-            solution = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
-            timeExtendedNN = System.currentTimeMillis() - startTime; // time in milliseconds
-            costExtendedNN = CostFunction.calcCostFunction(solution, graph);
-            if (costExtendedNN > costCurrentBest) {
-                costCurrentBest = costExtendedNN;
-            }
+                startTime = System.currentTimeMillis();
+                solution = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
+                avgTimeExtendedNN += System.currentTimeMillis() - startTime; // time in milliseconds
+                costExtendedNN = CostFunction.calcCostFunction(solution, graph);
+                avgCostExtendedNN += costExtendedNN;
+                if (costExtendedNN < costCurrentBest) { costCurrentBest = costExtendedNN; }
 
-            startTime = System.currentTimeMillis();
-            solution = TwoOPT.twoOpt(graph);
-            timeOPT = System.currentTimeMillis() - startTime; // time in milliseconds
-            costOPT = CostFunction.calcCostFunction(solution, graph);
-            if (costOPT > costCurrentBest) {
-                costCurrentBest = costOPT;
-            }
+                startTime = System.currentTimeMillis();
+                solution = TwoOPT.twoOpt(graph);
+                avgTimeOPT = System.currentTimeMillis() - startTime; // time in milliseconds
+                costOPT = CostFunction.calcCostFunction(solution, graph);
+                avgCostOPT += costOPT;
+                if (costOPT < costCurrentBest) { costCurrentBest = costOPT; }
 
-            assert fileWriter != null;
+                avgDeviationKRand += (costKRand - costCurrentBest) / costCurrentBest;
+                avgDeviationNearestNeighbour += (costNearestNeighbour - costCurrentBest) / costCurrentBest;
+                avgDeviationExtendedNN += (costExtendedNN - costCurrentBest) / costCurrentBest;
+                avgDeviationOPT += (costOPT - costCurrentBest) / costCurrentBest;
+                avgBestCost += costCurrentBest;
+                avgDistance += graph.findAverageDistance();
+            }
+            avgCostKRand /= configTestsNo;
+            avgCostNearestNeighbour /= configTestsNo;
+            avgCostExtendedNN /= configTestsNo;
+            avgCostOPT /= configTestsNo;
+
+            avgTimeKRand /= configTestsNo;
+            avgTimeNearestNeighbour /= configTestsNo;
+            avgTimeExtendedNN /= configTestsNo;
+            avgTimeOPT /= configTestsNo;
+
+            avgDeviationKRand /= configTestsNo;
+            avgDeviationNearestNeighbour /= configTestsNo;
+            avgDeviationExtendedNN /= configTestsNo;
+            avgDeviationOPT /= configTestsNo;
+            avgBestCost /= configTestsNo;
+            avgDistance /= configTestsNo;
+
             try {
-                fileWriter.write(fileName + " " + graph.vNo + " " +
-                        costKRand + " " + timeKRand + " " + ((costKRand - costCurrentBest) / costCurrentBest) + " " +
-                        costNearestNeighbour + " " + timeNearestNeighbour + " " + ((costNearestNeighbour - costCurrentBest) / costCurrentBest) + " " +
-                        costExtendedNN + " " + timeExtendedNN + " " + ((costExtendedNN - costCurrentBest) / costCurrentBest) + " " +
-                        costOPT + " " + timeOPT + " " + ((costExtendedNN - costCurrentBest) / costCurrentBest) + " " +
-                        costCurrentBest + " " +
-                        graph.findAverageDistance() + "\n");
-            } catch (IOException e) {
-                e.printStackTrace();
+                assert fileWriter != null;
+                fileWriter.write(vNo + " " +
+                        avgCostKRand + " " + avgTimeKRand + " " + avgDeviationKRand + " " +
+                        avgCostNearestNeighbour + " " + avgTimeNearestNeighbour + " " + avgDeviationNearestNeighbour + " " +
+                        avgCostExtendedNN + " " + avgTimeExtendedNN + " " + avgDeviationExtendedNN + " " +
+                        avgCostOPT + " " + avgTimeOPT + " " + avgDeviationOPT + " " +
+                        avgBestCost + " " + avgDistance + "\n");
             }
+            catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("file writer in in tests for random error");
+            }
+            avgCostKRand = 0.0;
+            avgCostNearestNeighbour = 0.0;
+            avgCostExtendedNN = 0.0;
+            avgCostOPT = 0.0;
+
+            avgTimeKRand = 0;
+            avgTimeNearestNeighbour = 0;
+            avgTimeExtendedNN = 0;
+            avgTimeOPT = 0;
+
+            avgDeviationKRand = 0.0;
+            avgDeviationNearestNeighbour = 0.0;
+            avgDeviationExtendedNN = 0.0;
+            avgDeviationOPT = 0.0;
+            avgBestCost = 0.0;
+            avgDistance = 0.0;
 
             vNo += increment;
+        }
+
+        try {
+            assert fileWriter != null;
+            fileWriter.close();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("closing file writer error");
         }
     }
 
     public static void main(String[] args) {
-        if (args.length < 1) {
-            System.err.println("Invalid arguments. Usage [randFull | randUpper | randEuclid] <number of nodes> <upper bound of weights> or <fileName>");
-        } else {
-            Graph g = null;
-            int vNo = 0;
-            int bound = 0;
-            if ("randFull".equals(args[0]) || "randUpper".equals(args[0]) || "randEuclid".equals(args[0])) {
-                try {
-                    vNo = Integer.parseInt(args[1]);
-                    bound = Integer.parseInt(args[2]);
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid number of nodes.");
-                }
-                if ("randFull".equals(args[0])) {
-                    // generate random graph with full matrix
-                    g = GraphCreator.randomFullMatrix(vNo, bound);
-                } else if ("randUpper".equals(args[0])) {
-                    g = GraphCreator.randomSymmetric(vNo, bound);
-                } else if ("randEuclid".equals(args[0])) {
-                    g = GraphCreator.randomEuclidean(vNo, bound);
-                }
-            } else { // get from file
-                try {
-                    g = GraphCreator.fromFile(args[0]);
-                } catch (IOException e) {
-                    System.err.println("Cannot open file.");
-                }
-            }
-            if (g != null) {
-                // run algorithms on this graph and print the results
-                List<Integer> tour;
-                tour = KRandom.kRandom(10000, g);
-                System.out.println("Solution found by k-random algorithm: " + tour + "\ncost: " + CostFunction.calcCostFunction(tour, g));
+//        if (args.length < 1) {
+//            System.err.println("Invalid arguments. Usage [randFull | randUpper | randEuclid] <number of nodes> <upper bound of weights> or <fileName>");
+//        } else {
+//            Graph g = null;
+//            int vNo = 0;
+//            int bound = 0;
+//            if ("randFull".equals(args[0]) || "randUpper".equals(args[0]) || "randEuclid".equals(args[0])) {
+//                try {
+//                    vNo = Integer.parseInt(args[1]);
+//                    bound = Integer.parseInt(args[2]);
+//                } catch (NumberFormatException e) {
+//                    System.err.println("Invalid number of nodes.");
+//                }
+//                if ("randFull".equals(args[0])) {
+//                    // generate random graph with full matrix
+//                    g = GraphCreator.randomFullMatrix(vNo, bound);
+//                } else if ("randUpper".equals(args[0])) {
+//                    g = GraphCreator.randomSymmetric(vNo, bound);
+//                } else if ("randEuclid".equals(args[0])) {
+//                    g = GraphCreator.randomEuclidean(vNo, bound);
+//                }
+//            } else { // get from file
+//                try {
+//                    g = GraphCreator.fromFile(args[0]);
+//                } catch (IOException e) {
+//                    System.err.println("Cannot open file.");
+//                }
+//            }
+//            if (g != null) {
+//                // run algorithms on this graph and print the results
+//                List<Integer> tour;
+//                tour = KRandom.kRandom(10000, g);
+//                System.out.println("Solution found by k-random algorithm: " + tour + "\ncost: " + CostFunction.calcCostFunction(tour, g));
+//
+//                tour = NearestNeighbour.nearestNeighbour(g, 1);
+//                System.out.println("Solution found by the nearest neighbour algorithm: " + tour + "\ncost: " + CostFunction.calcCostFunction(tour, g));
+//
+//                tour = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
+//                System.out.println("Solution found by the extended nearest neighbour algorithm: " + tour + "\ncost: " + CostFunction.calcCostFunction(tour, g));
+//
+//                tour = TwoOPT.twoOpt(g);
+//                System.out.println("Solution found by the 2-OPT algorithm: " + tour + "\ncost: " + CostFunction.calcCostFunction(tour, g));
+//
+//            } else {
+//                System.err.println("Cannot create a graph.");
+//            }
+//        }
 
-                tour = NearestNeighbour.nearestNeighbour(g, 1);
-                System.out.println("Solution found by the nearest neighbour algorithm: " + tour + "\ncost: " + CostFunction.calcCostFunction(tour, g));
-
-                tour = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
-                System.out.println("Solution found by the extended nearest neighbour algorithm: " + tour + "\ncost: " + CostFunction.calcCostFunction(tour, g));
-
-                tour = TwoOPT.twoOpt(g);
-                System.out.println("Solution found by the 2-OPT algorithm: " + tour + "\ncost: " + CostFunction.calcCostFunction(tour, g));
-
-            } else {
-                System.err.println("Cannot create a graph.");
-            }
-        }
+        testForRandom("tst_tsp.txt", GraphType.UPPER_ROW, 2000, 2, 100, 5);
     }
+
 }
