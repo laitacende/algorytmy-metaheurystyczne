@@ -6,6 +6,8 @@ import structures.Graph;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
 
 
 public class GraphCreator {
@@ -90,6 +92,9 @@ public class GraphCreator {
             if (data[0].equals("EDGE_WEIGHT_TYPE")) {
                 graphType = data[1];
             }
+            if (data[0].equals("EDGE_WEIGHT_FORMAT")) {
+                graphType = data[1];
+            }
 
         } while (!(data[0].equals("NODE_COORD_SECTION") || data[0].equals("EDGE_WEIGHT_SECTION")));
         data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
@@ -101,8 +106,8 @@ public class GraphCreator {
 
                 // gathering coordinates
                 int i = 1;
-                while (!data[0].equals("EOF")) {
-                    g.coordinates[i] = new Coordinates(Integer.parseInt(data[1]), Integer.parseInt(data[2]));
+                while (!data[0].equals("EOF") && !data[0].equals("DISPLAY_DATA_SECTION")) {
+                    g.coordinates[i] = new Coordinates((int) Double.parseDouble(data[1]), (int) Double.parseDouble(data[2]));
 
                     data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
                     i++;
@@ -114,35 +119,53 @@ public class GraphCreator {
                 return g;
             }
             case "FULL_MATRIX" -> {
-                g = new Graph(size, GraphType.UPPER_ROW);
+                g = new Graph(size, GraphType.FULL_MATRIX);
 
                 int i = 1;
-                while (!data[0].equals("EOF")) {
-                    for (int j = 1; j < g.getSize(); j++) {
+                int dataCounter = 0;
+                while (!data[0].equals("EOF") && !data[0].equals("DISPLAY_DATA_SECTION") && i < g.getSize()) {
+//                    for (int j = 1; j < g.getSize(); j++) {
+//                        if (i == j) {
+//                            g.addEdge(i, j, -1.0);
+//                        }
+//                        else {
+//                            g.addEdge(i, j, Double.parseDouble(data[j - 1]));
+//                        }
+//                    }
+                    int j = 1;
+                    while (j < g.getSize() && !Objects.equals(data[0], "EOF")) {
                         if (i == j) {
                             g.addEdge(i, j, -1.0);
+                            dataCounter++;
+                        } else {
+                            g.addEdge(i, j, Double.parseDouble(data[dataCounter]));
+                            dataCounter++;
                         }
-                        else {
-                            g.addEdge(i, j, Double.parseDouble(data[j - 1]));
+                        if (dataCounter == data.length) { // continued in the next line
+                            data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
+                            dataCounter = 0;
                         }
+                        j++;
                     }
-                    data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");
                     i++;
                 }
                 return g;
             }
             case "UPPER_ROW" -> {
-                g = new Graph(size, GraphType.FULL_MATRIX);
+                g = new Graph(size, GraphType.UPPER_ROW);
                 g.addEdge(1, 1, -1.0);
 
-                int i = 2;
-                while (!data[0].equals("EOF")) {
-                    for (int j = 1; j <= i; j++) {
+                int i = 1;
+                while (!data[0].equals("EOF") && !data[0].equals("DISPLAY_DATA_SECTION")) {
+                   // System.out.println(Arrays.toString(data));
+                    int dataIndex = 0;
+                    for (int j = i; j <= size; j++) {
+                       // System.out.println(j + " " + i);
                         if (i == j) {
-                            g.addEdge(i, j, -1.0);
+                            g.addEdge(i, i, -1.0);
                         } else {
-                            g.addEdge(i, j, Double.parseDouble(data[j - 1]));
-                            g.addEdge(j, i, Double.parseDouble(data[j - 1]));
+                            g.addEdge(i, j, Double.parseDouble(data[dataIndex]));
+                            g.addEdge(j, i, Double.parseDouble(data[dataIndex++]));
                         }
                     }
                     data = reader.readLine().trim().replaceAll("\\s+", " ").split(" ");

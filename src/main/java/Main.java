@@ -9,6 +9,7 @@ import utils.GraphType;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 public class Main {
@@ -74,78 +75,145 @@ public class Main {
         }
     }
 
-
-    public static void testFromFile() {
-        // tsp and atsp
-        File dir = new File("../tsp");
-        String[] fileList = dir.list();
-        File file = new File("results_tsp.txt");
-        FileWriter fileWriter =  null;
-
+    public static void testConstK() {
+        Graph g = null;
+        int vNo = 10;
+        while (vNo <= 500) {
+            int i = 1;
+            while (i <= 10) {
+                System.out.println("i: " + i);
+                g = GraphCreator.randomFullMatrix(vNo, 100);
+                g.dumpToFile("./kconst/testkconst_" + vNo + "_" + i);
+                i++;
+            }
+            vNo += 10;
+        }
+        File file = new File("results_kconst.txt");
+        FileWriter fileWriter = null;
         try {
             fileWriter = new FileWriter(file);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        long avg = 0;
+        long timeAvg = 0;
+        vNo = 10;
+        while (vNo <= 300) {
+            System.out.println("vNo: " + vNo);
+            avg = 0;
+            timeAvg = 0;
+            for (int j = 1; j <= 10; j++) {
+                try {
+                    g = GraphCreator.fromFile("./kconst/testkconst_" + vNo + "_" + j);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                long startTime = System.currentTimeMillis();
+                List<Integer> c = KRandom.kRandom(350, g);
+                timeAvg += System.currentTimeMillis() - startTime;
+                double cost = CostFunction.calcCostFunction(c, g);
+                avg += cost;
+            }
+            try {
+                assert fileWriter != null;
+                fileWriter.write(vNo + " " + (avg / 10) + " " + (timeAvg  / 10) + "\n");
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            vNo += 10;
+        }
+        try {
+            fileWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static void testFromFile(String fileIn) {
+        // tsp and atsp
+//        String prefix = "../tsp";
+//        File dir = new File(prefix);
+//        String[] fileList = dir.list();
+        String withoutPrefix = fileIn.substring(8, fileIn.length() - 5);
+        withoutPrefix = withoutPrefix.substring(8, withoutPrefix.length());
+        System.out.println("name: " + withoutPrefix);
+        File file = new File("results_atsp.txt");
+        FileWriter fileWriter =  null;
+        HashMap<String, Integer> solutions;
+        int K_OPTIMAL_MULTIPLIER = 350;
+        try {
+            fileWriter = new FileWriter(file, true); // append to file
+            solutions = CostFunction.getSolutionsFromFile("../solutions/solutions_atsp.txt");
         } catch (IOException e) {
             e.printStackTrace();
             return;
         }
-        Graph g;
+        Graph g = null;
         List<Integer> tour;
-        if (fileList != null) {
-            for(String fileName : fileList) {
+      //  if (fileList != null) {
+           // for(String fileName : fileList) {
                 try {
-                    g = GraphCreator.fromFile("../tsp/" + fileName);
+                   // g = GraphCreator.fromFile(prefix + "/" + fileName);
+                    g = GraphCreator.fromFile(fileIn);
+                    //System.out.println(fileName);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    continue;
+                    //continue;
                 }
-                // test algorithms
-                double costKRand = 0;
-                double costNeighbour = 0;
-                double costExtended = 0;
-                double costOPT = 0;
+                if (g != null) {
+                    // test algorithms
+                    double costKRand = 0;
+                    double costNeighbour = 0;
+                    double costExtended = 0;
+                    double costOPT = 0;
 
-                long timeKRand = 0;
-                long timeNeighbour = 0;
-                long timeExtended = 0;
-                long timeOPT = 0;
+                    long timeKRand = 0;
+                    long timeNeighbour = 0;
+                    long timeExtended = 0;
+                    long timeOPT = 0;
 
-                assert g != null;
-                long startTime = System.currentTimeMillis();
-                tour = KRandom.kRandom(g.vNo * 100, g);
-                costKRand = CostFunction.calcCostFunction(tour, g);
-                timeKRand = System.currentTimeMillis() - startTime;
+                    long startTime = System.currentTimeMillis();
+                    System.out.println("KRandom");
+                    tour = KRandom.kRandom(g.vNo * K_OPTIMAL_MULTIPLIER, g);
+                    costKRand = CostFunction.calcCostFunction(tour, g);
+                    timeKRand = System.currentTimeMillis() - startTime;
 
-                startTime = System.currentTimeMillis();
-                tour = NearestNeighbour.nearestNeighbour(g, 1);
-                costNeighbour = CostFunction.calcCostFunction(tour, g);
-                timeNeighbour = System.currentTimeMillis() - startTime;
+                    System.out.println("Nearesteighbour");
+                    startTime = System.currentTimeMillis();
+                    tour = NearestNeighbour.nearestNeighbour(g, 1);
+                    costNeighbour = CostFunction.calcCostFunction(tour, g);
+                    timeNeighbour = System.currentTimeMillis() - startTime;
 
-                startTime = System.currentTimeMillis();
-                tour = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
-                costExtended = CostFunction.calcCostFunction(tour, g);
-                timeExtended = System.currentTimeMillis() - startTime;
+                    System.out.println("ExtendedNearesteighbour");
+                    startTime = System.currentTimeMillis();
+                    tour = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
+                    costExtended = CostFunction.calcCostFunction(tour, g);
+                    timeExtended = System.currentTimeMillis() - startTime;
 
-                startTime = System.currentTimeMillis();
-                tour = TwoOPT.twoOpt(g);
-                costOPT = CostFunction.calcCostFunction(tour, g);
-                timeOPT = System.currentTimeMillis() - startTime;
+                    System.out.println("TwoOPT");
+                    startTime = System.currentTimeMillis();
+                    tour = TwoOPT.twoOpt(g);
+                    costOPT = CostFunction.calcCostFunction(tour, g);
+                    timeOPT = System.currentTimeMillis() - startTime;
 
-                // find optimum (if there is available) TODO
-
-
-
-                try {
-                    fileWriter.write(fileName + " " + g.vNo + " " +
-                            costKRand + " " + timeKRand + " " +
-                            costNeighbour + " " + timeNeighbour + " " +
-                            costExtended + " " + timeExtended + " " +
-                            costOPT + " " + timeOPT + " " +
-                            g.findAverageDistance() + "\n");
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    // fileName numberOfNodes costKRandom timeKRandom
+                    // costNeighbour timeNeighbour costExtendedNeighbour
+                    // timeExtendedNeighbour costOPT timeOPT
+                    // averageDistance optimalSolution
+                    try {
+                        fileWriter.write(withoutPrefix + " " + g.vNo + " " +
+                                costKRand + " " + timeKRand + " " +
+                                costNeighbour + " " + timeNeighbour + " " +
+                                costExtended + " " + timeExtended + " " +
+                                costOPT + " " + timeOPT + " " +
+                                g.findAverageDistance() + " " + solutions.get(withoutPrefix) + "\n");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-        }
+           // }
+      //  }
         try {
             fileWriter.close();
         } catch (IOException e) {
@@ -344,8 +412,6 @@ public class Main {
 //                System.err.println("Cannot create a graph.");
 //            }
 //        }
-
-        testForRandom("tst_tsp.txt", GraphType.UPPER_ROW, 2000, 2, 100, 5);
     }
 
 }
