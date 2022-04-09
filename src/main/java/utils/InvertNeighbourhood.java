@@ -1,5 +1,6 @@
 package utils;
 
+import structures.Cell;
 import structures.Graph;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ public class InvertNeighbourhood implements INeighbourhood {
 
     // indices - move to be added to tabu list
     @Override
-    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices) {
+    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices, Cell[][] tabuList) {
         List<Integer> newPermutation;
         List<Integer> currentPermutation = new ArrayList<>(permutation);
         Double currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
@@ -40,7 +41,7 @@ public class InvertNeighbourhood implements INeighbourhood {
                     newDistance += g.getEdge(newPermutation.get(Math.floorMod(i - 1, size)), newPermutation.get(i));
                 }
 
-                if (newDistance < newDistanceBest) {
+                if (newDistance < newDistanceBest && !tabuList[i][j].val) { // is better and not on tabu list
                     newPermutationBest = new ArrayList<>(newPermutation);
                     newDistanceBest = newDistance;
                     indices[0] = i;

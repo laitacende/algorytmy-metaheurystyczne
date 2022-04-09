@@ -5,5 +5,5 @@ public class Cell {
         this.val = val;
     }
 
-    public Boolean val;
+    public Boolean val = false;
 }

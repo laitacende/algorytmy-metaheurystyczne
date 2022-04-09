@@ -1,5 +1,6 @@
 package utils;
 
+import structures.Cell;
 import structures.Graph;
 
 import java.util.ArrayList;
@@ -7,16 +8,18 @@ import java.util.List;
 
 public class SwapNeighbourhood implements INeighbourhood {
     @Override
-    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices) {
+    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices, Cell[][] tabuList) {
         List<Integer> newPermutation;
         List<Integer> currentPermutation = new ArrayList<>(permutation);
         Double currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
         Double newDistance;
+        Double newDistanceBest = currentDistance;
+        List<Integer> newPermutationBest = new ArrayList<>();
         int size = currentPermutation.size();
 
-        // invert
+        // swap
         for (int i = 0; i < g.vNo - 2; i++) { // don't consider the last node - there is nothing to invert
-            for (int j = i + 1; j < g.vNo - 1; j++) { // check from position 'onwards'
+            for (int j = i + 1; j < size; j++) { // check from position 'onwards'
                 newPermutation = new ArrayList<>(currentPermutation);
                 newDistance = currentDistance;
                 // swap i and j
@@ -40,14 +43,14 @@ public class SwapNeighbourhood implements INeighbourhood {
                     newDistance += g.getEdge(newPermutation.get(j), newPermutation.get(Math.floorMod(j + 1, size)));
                 }
 
-                if (newDistance < currentDistance) {
-                    currentPermutation = new ArrayList<>(newPermutation);
-                    currentDistance = newDistance;
+                if (newDistance < newDistanceBest && !tabuList[i][j].val) { // is better and not on tabu list
+                    newPermutationBest = new ArrayList<>(newPermutation);
+                    newDistanceBest = newDistance;
                     indices[0] = i;
                     indices[1] = j;
                 }
             }
         }
-        return currentPermutation;
+        return newPermutationBest;
     }
 }
