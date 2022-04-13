@@ -6,18 +6,17 @@ import structures.Graph;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InvertNeighbourhood implements INeighbourhood {
+public class InvertNeighbourhood extends AbstractNeighbourhood {
 
     // indices - move to be added to tabu list
     @Override
-    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices, Cell[][] tabuList) {
-        List<Integer> newPermutation;
-        List<Integer> currentPermutation = new ArrayList<>(permutation);
-        Double currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
-        Double newDistance;
+    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices, Cell[][] tabuList, int percent, int maxCount) {
+        currentPermutation = new ArrayList<>(permutation);
+        currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
         Double newDistanceBest = currentDistance;
-        List<Integer> newPermutationBest = new ArrayList<>();
-        int size = currentPermutation.size();
+        newPermutationBest = new ArrayList<>();
+        size = currentPermutation.size();
+        counter = 0; // count permutations without improvement
 
         // invert
         for (int i = 0; i < g.vNo - 2; i++) { // don't consider the last node - there is nothing to invert
@@ -36,16 +35,22 @@ public class InvertNeighbourhood implements INeighbourhood {
                 if (Math.floorMod(j + 1, size) != i) {
                     newDistance -= g.getEdge(currentPermutation.get(j), currentPermutation.get(Math.floorMod(j + 1, size)));
                     newDistance += g.getEdge(newPermutation.get(j), newPermutation.get(Math.floorMod(j + 1, size)));
-                    newDistance += g.getEdge(newPermutation.get(Math.floorMod(i - 1, size)), newPermutation.get(i));
-                } else {
-                    newDistance += g.getEdge(newPermutation.get(Math.floorMod(i - 1, size)), newPermutation.get(i));
                 }
+                newDistance += g.getEdge(newPermutation.get(Math.floorMod(i - 1, size)), newPermutation.get(i));
 
                 if (newDistance < newDistanceBest && !tabuList[i][j].val) { // is better and not on tabu list
+                    if (newDistance / newDistanceBest > (double) percent / 100) {
+                        counter = 0;
+                    }
                     newPermutationBest = new ArrayList<>(newPermutation);
                     newDistanceBest = newDistance;
                     indices[0] = i;
                     indices[1] = j;
+                } else { // there is no improvement and counting mode is on
+                    counter++;
+                    if (counter > maxCount) {
+                        return newPermutationBest;
+                    }
                 }
             }
         }

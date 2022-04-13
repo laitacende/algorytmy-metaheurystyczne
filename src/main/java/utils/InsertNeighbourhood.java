@@ -6,16 +6,15 @@ import structures.Graph;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InsertNeighbourhood implements INeighbourhood {
+public class InsertNeighbourhood extends AbstractNeighbourhood {
     @Override
-    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices,  Cell[][] tabuList) {
-        List<Integer> newPermutation;
-        List<Integer> currentPermutation = new ArrayList<>(permutation);
-        Double currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
-        Double newDistance;
-        Double newDistanceBest = currentDistance;
-        List<Integer> newPermutationBest = new ArrayList<>();
-        int size = currentPermutation.size();
+    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices,  Cell[][] tabuList, int percent, int maxCount) {
+        currentPermutation = new ArrayList<>(permutation);
+        currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
+        newDistanceBest = currentDistance;
+        newPermutationBest = new ArrayList<>();
+        size = currentPermutation.size();
+        counter = 0; // count permutations without improvement
 
         // insertion
         for (int i = 0; i < size; i++) {
@@ -57,12 +56,19 @@ public class InsertNeighbourhood implements INeighbourhood {
                         newDistance += g.getEdge(newPermutation.get(Math.floorMod(j - 1, size)), newPermutation.get(j));
                     }
 
-
                     if (newDistance < newDistanceBest && !tabuList[i][j].val) {
+                        if (newDistance / newDistanceBest > (double) percent / 100) {
+                            counter = 0;
+                        }
                         newPermutationBest = new ArrayList<>(newPermutation);
                         newDistanceBest = newDistance;
                         indices[0] = i;
                         indices[1] = j;
+                    } else {
+                        counter++;
+                        if (counter > maxCount) {
+                            return newPermutationBest;
+                        }
                     }
                 }
             }

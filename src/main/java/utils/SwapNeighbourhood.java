@@ -6,16 +6,15 @@ import structures.Graph;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SwapNeighbourhood implements INeighbourhood {
+public class SwapNeighbourhood extends AbstractNeighbourhood  {
     @Override
-    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices, Cell[][] tabuList) {
-        List<Integer> newPermutation;
-        List<Integer> currentPermutation = new ArrayList<>(permutation);
-        Double currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
-        Double newDistance;
-        Double newDistanceBest = currentDistance;
-        List<Integer> newPermutationBest = new ArrayList<>();
-        int size = currentPermutation.size();
+    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices, Cell[][] tabuList, int percent, int maxCount) {
+        currentPermutation = new ArrayList<>(permutation);
+        currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
+        newDistanceBest = currentDistance;
+        newPermutationBest = new ArrayList<>();
+        size = currentPermutation.size();
+        counter = 0; // count permutations without improvement
 
         // swap
         for (int i = 0; i < g.vNo - 2; i++) { // don't consider the last node - there is nothing to invert
@@ -44,10 +43,18 @@ public class SwapNeighbourhood implements INeighbourhood {
                 }
 
                 if (newDistance < newDistanceBest && !tabuList[i][j].val) { // is better and not on tabu list
+                    if (newDistance / newDistanceBest > (double) percent / 100) {
+                        counter = 0;
+                    }
                     newPermutationBest = new ArrayList<>(newPermutation);
                     newDistanceBest = newDistance;
                     indices[0] = i;
                     indices[1] = j;
+                } else { // there is no improvement and counting mode is on
+                    counter++;
+                    if (counter > maxCount) {
+                        return newPermutationBest;
+                    }
                 }
             }
         }
