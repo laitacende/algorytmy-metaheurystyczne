@@ -58,7 +58,7 @@ public class InsertNeighbourhood implements INeighbourhood {
                     }
 
 
-                    if (newDistance < newDistanceBest) {
+                    if (newDistance < newDistanceBest && !tabuList[i][j].val) {
                         newPermutationBest = new ArrayList<>(newPermutation);
                         newDistanceBest = newDistance;
                         indices[0] = i;
