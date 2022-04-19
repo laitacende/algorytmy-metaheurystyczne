@@ -20,7 +20,7 @@ public class InvertNeighbourhood extends AbstractNeighbourhood {
         currentBestDistance = currentDistance;
 
         size = currentPermutation.size();
-        counter = 0; // count permutations without improvement
+        counter = Integer.MIN_VALUE;
 
         // invert
         for (int i = 0; i < graph.vNo - 2; i++) { // don't consider the last node - there is nothing to invert

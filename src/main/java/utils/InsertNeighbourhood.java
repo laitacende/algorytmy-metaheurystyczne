@@ -20,7 +20,7 @@ public class InsertNeighbourhood extends AbstractNeighbourhood {
         currentBestDistance = currentDistance;
 
         size = currentPermutation.size();
-        counter = 0; // count permutations without improvement
+        counter = Integer.MIN_VALUE;
 
         // insertion
         for (int i = 0; i < size; i++) {
