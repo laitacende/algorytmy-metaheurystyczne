@@ -1,5 +1,6 @@
 package utils;
 
+import custom_exceptions.NoNewNeighbourException;
 import structures.Graph;
 import structures.TabuList;
 import java.util.ArrayList;
@@ -10,10 +11,10 @@ public class InsertNeighbourhood extends AbstractNeighbourhood {
 
     @Override
     public List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList,
-                                          Double globalBestDistance, int percent, int maxCount) {
+                                          Double globalBestDistance, int percent, int maxCount) throws NoNewNeighbourException {
 
         currentPermutation = new ArrayList<>(permutation);
-        currentBestPermutation = new ArrayList<>();
+        currentBestPermutation = new ArrayList<>(permutation);
 
         currentDistance = CostFunction.calcCostFunction(currentPermutation, graph);
         currentBestDistance = currentDistance;
@@ -96,6 +97,10 @@ public class InsertNeighbourhood extends AbstractNeighbourhood {
                 }
             }
         }
+
+        // when no new neighbour found
+        if (currentBestPermutation.equals(currentPermutation)) throw new NoNewNeighbourException();
+
         return currentBestPermutation;
     }
 }

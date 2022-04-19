@@ -1,5 +1,6 @@
 package utils;
 
+import custom_exceptions.NoNewNeighbourException;
 import structures.Graph;
 import structures.TabuList;
 import java.util.List;
@@ -18,6 +19,6 @@ public abstract class AbstractNeighbourhood {
     int size;
 
     public abstract List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList,
-                                                   Double globalBestDistance, int percent, int maxCount);
+                                                   Double globalBestDistance, int percent, int maxCount) throws NoNewNeighbourException;
 
 }

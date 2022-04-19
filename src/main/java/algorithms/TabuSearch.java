@@ -1,5 +1,6 @@
 package algorithms;
 
+import custom_exceptions.NoNewNeighbourException;
 import structures.Graph;
 import structures.TabuList;
 import utils.CostFunction;
@@ -39,7 +40,17 @@ public class TabuSearch {
         while (true) {
 
             // search neighbourhood
-            currentTour = neighbourhood.getBestNeighbour(currentTour, graph, indexes, tabuList, bestDistance, 5, 1000);
+            try {
+                currentTour = neighbourhood.getBestNeighbour(currentTour, graph, indexes, tabuList, bestDistance, 5, 1000);
+            }
+            catch (NoNewNeighbourException e) {
+                // when no new neighbour found due to tabu list
+                // TODO implement some equivalent action
+
+                // for example : start from new, random solution
+                currentTour = KRandom.generateRandomCycle(graph);
+                continue;
+            }
 
             // if found new best tour save it
             if (CostFunction.calcCostFunction(currentTour, graph) < CostFunction.calcCostFunction(bestTour, graph)) {
@@ -51,7 +62,10 @@ public class TabuSearch {
                 noImprovementCounter++;
 
                 // When no good solution found in a really long time
-                if (noImprovementCounter > stopCondVal) { // might be different condition
+                // TODO implement some equivalent action
+                if (noImprovementCounter > stopCondVal) {
+
+                    // for example : start from new, random solution
                     currentTour = KRandom.generateRandomCycle(graph);
                     continue;
                 }
