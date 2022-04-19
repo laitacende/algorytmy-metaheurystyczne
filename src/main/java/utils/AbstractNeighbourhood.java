@@ -17,7 +17,7 @@ public abstract class AbstractNeighbourhood {
     int counter;
     int size;
 
-    public abstract List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes,
-                                                   TabuList tabuList, int percent, int maxCount);
+    public abstract List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList,
+                                                   Double globalBestDistance, int percent, int maxCount);
 
 }

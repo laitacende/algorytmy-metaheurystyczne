@@ -13,13 +13,13 @@ public class TabuSearch {
     // tabu search with extended neighbour result
     public static  List<Integer> tabuSearchENN(Graph graph, AbstractNeighbourhood neighbourhood) {
         List<Integer> startTour = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
-        return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT, 1000);
+        return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT, 10000);
     }
 
     // tabu search with KRandom result
     public static  List<Integer> tabuSearchKR(Graph graph, AbstractNeighbourhood neighbourhood) {
         List<Integer> startTour = KRandom.generateRandomCycle(graph);
-        return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT, 1000);
+        return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT, 10000);
     }
 
     public static  List<Integer> tabuSearch(Graph graph, List<Integer> startTour, AbstractNeighbourhood neighbourhood,
@@ -29,8 +29,9 @@ public class TabuSearch {
 
         TabuList tabuList = new TabuList(graph.vNo, TABU_SIZE);
         Integer[] indexes = new Integer[2];
-        List<Integer> bestTour = startTour;
         List<Integer> currentTour = startTour;
+        List<Integer> bestTour = startTour;
+        Double bestDistance = CostFunction.calcCostFunction(startTour, graph);
 
         int iterationsAmount = 0;
         int noImprovementCounter = 0;
@@ -38,11 +39,12 @@ public class TabuSearch {
         while (true) {
 
             // search neighbourhood
-            currentTour = neighbourhood.getBestNeighbour(currentTour, graph, indexes, tabuList, 5, 1000);
+            currentTour = neighbourhood.getBestNeighbour(currentTour, graph, indexes, tabuList, bestDistance, 5, 1000);
 
             // if found new best tour save it
             if (CostFunction.calcCostFunction(currentTour, graph) < CostFunction.calcCostFunction(bestTour, graph)) {
                 bestTour = currentTour;
+                bestDistance = CostFunction.calcCostFunction(bestTour, graph);
                 noImprovementCounter = 0;
             }
             else {

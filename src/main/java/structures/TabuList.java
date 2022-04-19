@@ -20,11 +20,13 @@ public class TabuList {
 
 
     public void addToTabuList(int indexA, int indexB) {
+        // if already on the list return
         if (tabuList[indexA][indexB].value) return;
 
         tabuList[indexA][indexB].value = true;
-
         tabuQueue.add(tabuList[indexA][indexB]);
+
+        // if overflows the size remove oldest element
         if (tabuQueue.size() > tabuSize) {
             Objects.requireNonNull(tabuQueue.poll()).value = false;
         }

@@ -9,7 +9,9 @@ import java.util.List;
 public class InsertNeighbourhood extends AbstractNeighbourhood {
 
     @Override
-    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList, int percent, int maxCount) {
+    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList,
+                                          Double globalBestDistance, int percent, int maxCount) {
+
         currentPermutation = new ArrayList<>(permutation);
         currentBestPermutation = new ArrayList<>();
 
@@ -67,8 +69,15 @@ public class InsertNeighbourhood extends AbstractNeighbourhood {
                     newDistance += graph.getEdge(newPermutation.get(Math.floorMod(j - 1, size)), newPermutation.get(j));
                 }
 
+                // if permutation is better than global best solution add regardless
+                if (newDistance < globalBestDistance) {
+                    currentBestPermutation = new ArrayList<>(newPermutation);
+                    currentBestDistance = newDistance;
+                    indexes[0] = i;
+                    indexes[1] = j;
+                }
                 // if permutation is better and not on tabu list
-                if (newDistance < currentBestDistance && !tabuList.isOnTabuList(i, j)) {
+                else if (newDistance < currentBestDistance && !tabuList.isOnTabuList(i, j)) {
                     // if there is improvement - reset counter
                     if (newDistance / currentBestDistance > (double) percent / 100) { counter = 0; }
 
