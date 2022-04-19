@@ -1,20 +1,23 @@
 package utils;
 
-import structures.Cell;
 import structures.Graph;
-
-import java.util.ArrayList;
+import structures.TabuList;
 import java.util.List;
 
+
 public abstract class AbstractNeighbourhood {
-    List<Integer> newPermutation;
     List<Integer> currentPermutation;
+    List<Integer> currentBestPermutation;
+    List<Integer> newPermutation;
+
     Double currentDistance;
+    Double currentBestDistance;
     Double newDistance;
-    Double newDistanceBest;
-    List<Integer> newPermutationBest;
-    int size;
+
     int counter;
-    public abstract List<Integer> getBestNeighbour(List<Integer> permutation, Graph g,  Integer[] indices,
-                                                   Cell[][] tabuList, int percent, int maxCount);
+    int size;
+
+    public abstract List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes,
+                                                   TabuList tabuList, int percent, int maxCount);
+
 }

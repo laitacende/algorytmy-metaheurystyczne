@@ -136,7 +136,7 @@ public class Main {
 //        File dir = new File(prefix);
 //        String[] fileList = dir.list();
         String withoutPrefix = fileIn.substring(8, fileIn.length() - 5);
-        withoutPrefix = withoutPrefix.substring(8, withoutPrefix.length());
+        withoutPrefix = withoutPrefix.substring(8);
         System.out.println("name: " + withoutPrefix);
         File file = new File("results_atsp.txt");
         FileWriter fileWriter =  null;

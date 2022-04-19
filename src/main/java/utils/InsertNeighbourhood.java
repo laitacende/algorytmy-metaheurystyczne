@@ -1,78 +1,92 @@
 package utils;
 
-import structures.Cell;
 import structures.Graph;
-
+import structures.TabuList;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class InsertNeighbourhood extends AbstractNeighbourhood {
+
     @Override
-    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph g, Integer[] indices,  Cell[][] tabuList, int percent, int maxCount) {
+    public List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList, int percent, int maxCount) {
         currentPermutation = new ArrayList<>(permutation);
-        currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
-        newDistanceBest = currentDistance;
-        newPermutationBest = new ArrayList<>();
+        currentBestPermutation = new ArrayList<>();
+
+        currentDistance = CostFunction.calcCostFunction(currentPermutation, graph);
+        currentBestDistance = currentDistance;
+
         size = currentPermutation.size();
         counter = 0; // count permutations without improvement
 
         // insertion
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if (i != j) {
-                    newPermutation = new ArrayList<>(currentPermutation);
-                    newDistance = currentDistance;
-                    Integer inserted = currentPermutation.get(i);
-                    newDistance -= g.getEdge(currentPermutation.get(Math.floorMod(i - 1, size)), currentPermutation.get(i));
-                    newDistance -= g.getEdge(currentPermutation.get(i), currentPermutation.get(Math.floorMod(i + 1, size)));
-                    // get ith element
-                    if (i < j) { // shift from i + 1 to jth to left
-                        if (Math.floorMod(j + 1, size) != i) {
-                            newDistance -= g.getEdge(currentPermutation.get(j), currentPermutation.get(Math.floorMod(j + 1, size)));
-                        }
-                        int k = i + 1;
-                        while (k <= j) {
-                            newPermutation.set(k - 1, currentPermutation.get(k));
-                            k++;
-                        }
-                        newPermutation.set(j, inserted);
-                        newDistance += g.getEdge(newPermutation.get(Math.floorMod(i - 1, size)), newPermutation.get(i));
-                    } else { // shift from jth to ith right
-                        if (Math.floorMod(j - 1, size) != i) {
-                            newDistance -= g.getEdge(currentPermutation.get(Math.floorMod(j - 1, size)), currentPermutation.get(j));
-                        }
-                        int k = j;
-                        while (k < i) {
-                            newPermutation.set(k + 1, currentPermutation.get(k));
-                            k++;
-                        }
-                        newPermutation.set(j, inserted);
-                        newDistance += g.getEdge(newPermutation.get(i), newPermutation.get(Math.floorMod(i + 1, size)));
-                    }
-                    if (Math.floorMod(i - 1, size) != j || i > j) {
-                        newDistance += g.getEdge(newPermutation.get(j), newPermutation.get(Math.floorMod(j + 1, size)));
-                    }
-                    if (Math.floorMod(i + 1, size) != j || j > i) {
-                        newDistance += g.getEdge(newPermutation.get(Math.floorMod(j - 1, size)), newPermutation.get(j));
+
+                // skip all below when i = j
+                if (i == j) continue;
+
+                newPermutation = new ArrayList<>(currentPermutation);
+                newDistance = currentDistance;
+                newDistance -= graph.getEdge(currentPermutation.get(Math.floorMod(i - 1, size)), currentPermutation.get(i));
+                newDistance -= graph.getEdge(currentPermutation.get(i), currentPermutation.get(Math.floorMod(i + 1, size)));
+                Integer inserted = currentPermutation.get(i);
+
+                // get ith element
+                if (i < j) { // shift from i + 1 to jth to left
+                    if (Math.floorMod(j + 1, size) != i) {
+                        newDistance -= graph.getEdge(currentPermutation.get(j), currentPermutation.get(Math.floorMod(j + 1, size)));
                     }
 
-                    if (newDistance < newDistanceBest && !tabuList[i][j].val) {
-                        if (newDistance / newDistanceBest > (double) percent / 100) {
-                            counter = 0;
-                        }
-                        newPermutationBest = new ArrayList<>(newPermutation);
-                        newDistanceBest = newDistance;
-                        indices[0] = i;
-                        indices[1] = j;
-                    } else {
-                        counter++;
-                        if (counter > maxCount) {
-                            return newPermutationBest;
-                        }
+                    int k = i + 1;
+                    while (k <= j) {
+                        newPermutation.set(k - 1, currentPermutation.get(k));
+                        k++;
+                    }
+
+                    newPermutation.set(j, inserted);
+                    newDistance += graph.getEdge(newPermutation.get(Math.floorMod(i - 1, size)), newPermutation.get(i));
+                }
+                else { // shift from jth to ith right
+                    if (Math.floorMod(j - 1, size) != i) {
+                        newDistance -= graph.getEdge(currentPermutation.get(Math.floorMod(j - 1, size)), currentPermutation.get(j));
+                    }
+                    int k = j;
+                    while (k < i) {
+                        newPermutation.set(k + 1, currentPermutation.get(k));
+                        k++;
+                    }
+                    newPermutation.set(j, inserted);
+                    newDistance += graph.getEdge(newPermutation.get(i), newPermutation.get(Math.floorMod(i + 1, size)));
+                }
+                // update distance
+                if (Math.floorMod(i - 1, size) != j || i > j) {
+                    newDistance += graph.getEdge(newPermutation.get(j), newPermutation.get(Math.floorMod(j + 1, size)));
+                }
+                if (Math.floorMod(i + 1, size) != j || j > i) {
+                    newDistance += graph.getEdge(newPermutation.get(Math.floorMod(j - 1, size)), newPermutation.get(j));
+                }
+
+                // if permutation is better and not on tabu list
+                if (newDistance < currentBestDistance && !tabuList.isOnTabuList(i, j)) {
+                    // if there is improvement - reset counter
+                    if (newDistance / currentBestDistance > (double) percent / 100) { counter = 0; }
+
+                    currentBestPermutation = new ArrayList<>(newPermutation);
+                    currentBestDistance = newDistance;
+                    indexes[0] = i;
+                    indexes[1] = j;
+                }
+                else {
+                    counter++;
+
+                    // when there is no improvement - stop
+                    if (counter > maxCount) {
+                        return currentBestPermutation;
                     }
                 }
             }
         }
-        return newPermutationBest;
+        return currentBestPermutation;
     }
 }

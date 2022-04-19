@@ -40,12 +40,9 @@ public class CostFunction {
 
     // checks if cycle is valid in TSP
     public static boolean isAllowedCycle(List<Integer> cycle, Graph g) {
-        boolean isAllowedCycle = true;
+        boolean isAllowedCycle = cycle.size() == g.getSize() - 1;
 
         // checking the cycle size
-        if (cycle.size() != g.getSize() - 1) {
-            isAllowedCycle = false;
-        }
 
         // checking if there are duplicates
         Set<Integer> set = new HashSet<>(cycle);

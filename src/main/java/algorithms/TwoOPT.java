@@ -25,7 +25,9 @@ public class TwoOPT {
         currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
 
         while (improved) {
+
             newDistanceBest = Double.MAX_VALUE;
+
             // invert
             for (int i = 0; i < g.vNo - 2; i++) { // don't consider the last node - there is nothing to invert
                 for (int j = i + 1; j < g.vNo - 1; j++) { // check from position 'onwards'
@@ -51,7 +53,8 @@ public class TwoOPT {
             if (currentDistance > newDistanceBest) {
                 currentPermutation = new ArrayList<>(newPermutationBest);
                 currentDistance = newDistanceBest;
-            } else { // stop algorithm
+            }
+            else { // stop algorithm
                 improved = false;
             }
         }
