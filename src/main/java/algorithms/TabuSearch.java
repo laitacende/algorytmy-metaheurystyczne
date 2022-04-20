@@ -1,99 +1,43 @@
 package algorithms;
 
-import custom_exceptions.NoNewNeighbourException;
+import structures.Cell;
 import structures.Graph;
-import structures.TabuList;
-import utils.CostFunction;
 import utils.AbstractNeighbourhood;
 
 import java.util.*;
 
 public class TabuSearch {
-    private static final int TABU_SIZE = 13;
-
     // tabu search with extended neighbour result
-    public static  List<Integer> tabuSearchENN(Graph graph, AbstractNeighbourhood neighbourhood) {
-        List<Integer> startTour = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
-        return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT, 10000);
+    public static  List<Integer> tabuSearchENN(Graph g, AbstractNeighbourhood neighbourhood, int percent, int maxCount) {
+        List<Integer> startTour = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
+        return tabuSearch(g, startTour, neighbourhood, percent, maxCount);
     }
 
-    // tabu search with KRandom result
-    public static  List<Integer> tabuSearchKR(Graph graph, AbstractNeighbourhood neighbourhood) {
-        List<Integer> startTour = KRandom.generateRandomCycle(graph);
-        return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT, 10000);
-    }
-
-    public static  List<Integer> tabuSearch(Graph graph, List<Integer> startTour, AbstractNeighbourhood neighbourhood,
-                                            TabuStopCondType stopCondType, int stopCondVal) {
-
-        long startTime = System.currentTimeMillis();
-
-        TabuList tabuList = new TabuList(graph.vNo, TABU_SIZE);
-        Integer[] indexes = new Integer[2];
-        List<Integer> currentTour = startTour;
-        List<Integer> bestTour = startTour;
-        Double bestDistance = CostFunction.calcCostFunction(startTour, graph);
-
-        int iterationsAmount = 0;
-        int noImprovementCounter = 0;
-
-        while (true) {
-
-            // search neighbourhood
-            try {
-                currentTour = neighbourhood.getBestNeighbour(currentTour, graph, indexes, tabuList, bestDistance, 5, 1000);
+    public static  List<Integer> tabuSearch(Graph g, List<Integer> startTour, AbstractNeighbourhood neighbourhood,
+                                            int percent, int maxCount) {
+        // create matrix - tabu list and queue to remember the order
+        Cell[][] tabuList = new Cell[g.vNo][g.vNo]; // indices from 1 to n
+        for (int i = 0; i < g.vNo; i++ ) {
+            for (int j = 0; j < g.vNo; j++) {
+                tabuList[i][j].val = false; // not on tabu list
             }
-            catch (NoNewNeighbourException e) {
-                // when no new neighbour found due to tabu list
-                // TODO implement some equivalent action
-
-                // for example : start from new, random solution
-                currentTour = KRandom.generateRandomCycle(graph);
-                continue;
-            }
-
-            // if found new best tour save it
-            if (CostFunction.calcCostFunction(currentTour, graph) < CostFunction.calcCostFunction(bestTour, graph)) {
-                bestTour = currentTour;
-                bestDistance = CostFunction.calcCostFunction(bestTour, graph);
-                noImprovementCounter = 0;
-            }
-            else {
-                noImprovementCounter++;
-
-                // When no good solution found in a really long time
-                // TODO implement some equivalent action
-                if (noImprovementCounter > stopCondVal) {
-
-                    // for example : start from new, random solution
-                    currentTour = KRandom.generateRandomCycle(graph);
-                    continue;
-                }
-            }
-
-            // add move to tabu list
-            tabuList.addToTabuList(indexes[0], indexes[1]);
-
-            // checking whether to stop the algorithm
-            switch (stopCondType) {
-                case TIME_STOP_COND -> {
-                    if ((System.currentTimeMillis() - startTime) >= stopCondVal) {
-                        return bestTour;
-                    }
-                }
-                case ITERATIONS_AMOUNT -> {
-                    if (iterationsAmount >= stopCondVal) {
-                        return bestTour;
-                    }
-                }
-                case NO_IMPROVEMENT -> {
-                    if (noImprovementCounter >= stopCondVal) {
-                        return bestTour;
-                    }
-                }
-            }
-
-            iterationsAmount++;
         }
+        Queue<Cell> queueTabu = new ArrayDeque<>();
+        int tabuSize = 13; // test it
+        Integer[] indices = new Integer[2]; // indices to be pushed to tabu list
+
+        List<Integer> currentTour = startTour;
+
+        // search neighbourhood
+        currentTour = neighbourhood.getBestNeighbour(currentTour, g, indices, tabuList, percent, maxCount);
+        // add move to tabu list
+        tabuList[indices[0]][indices[1]].val = true;
+        queueTabu.add( tabuList[indices[0]][indices[1]]);
+        // check size of tabu list
+        if (queueTabu.size() > tabuSize) {
+            queueTabu.poll().val = false; // delete from tabu list
+        }
+
+        return currentTour;
     }
 }
