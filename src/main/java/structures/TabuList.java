@@ -66,6 +66,15 @@ public class TabuList {
         }
     }
 
+    public void clearTabuList() {
+        for (TabuListElement[] tabuListElements : tabuList) {
+            for (int j = 0; j < tabuList.length; j++) {
+                tabuListElements[j].value = false;
+            }
+        }
+        tabuQueue.clear();
+    }
+
     /**
      * An element of the tabu list
      */
