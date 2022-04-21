@@ -4,20 +4,24 @@ import java.util.*;
 
 public class BacktrackList {
     Deque<List<Integer>> backtrackListPermutation; // to store previous permutations
-    Deque<Coordinates> moves; // to store moves performed immediately after permutation on backtrackListPermutation
+    List<Integer> buffer;
+    Deque<TabuList> tabuLists; // to store tabu lists after some iterations are performed
     int size;
 
-    public void addToBacktrackList(List<Integer> permutation) {
-        backtrackListPermutation.add(permutation);
-
-//        if (backtrackListPermutation.size() > size) {
-//            backtrackListPermutation.remove(); // remove at head
-//            moves.remove();
-//        }
+    public void addPermutation(List<Integer> permutation) {
+        // add to buffer
+        buffer = new ArrayList<>(permutation); // copy
     }
 
-    public void addMove(int x, int y) {
-        moves.add(new Coordinates(x, y));
+    // called after a few iterations after calling add Permutation
+    public void addTabuList(TabuList list) {
+        tabuLists.add(new TabuList(list)); // copy tabu list
+        backtrackListPermutation.add(buffer);
+
+        if (tabuLists.size() > size) {
+            tabuLists.remove(); // remove at head (the oldest)
+            backtrackListPermutation.remove();
+        }
     }
 
     // get the last added element as it is probably better that the first one in the queue
@@ -29,9 +33,9 @@ public class BacktrackList {
         }
     }
 
-    public Coordinates getMove() {
-        if (moves.size() > 0) {
-            return moves.removeLast();
+    public TabuList getTabuList() {
+        if (tabuLists.size() > 0) {
+            return tabuLists.removeLast();
         } else {
             return null;
         }
@@ -40,6 +44,6 @@ public class BacktrackList {
     public BacktrackList(int size) {
         this.size = size;
         backtrackListPermutation = new ArrayDeque<>();
-        moves = new ArrayDeque<>();
+        tabuLists = new ArrayDeque<>();
     }
 }

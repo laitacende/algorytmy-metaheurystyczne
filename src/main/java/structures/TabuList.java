@@ -18,6 +18,15 @@ public class TabuList {
         initializeTabuList();
     }
 
+    // to make copy of list passed as an argument
+    public TabuList(TabuList list) {
+        this.tabuList = new TabuListElement[list.tabuList.length][list.tabuList.length];
+        this.tabuQueue = new ArrayDeque<>();
+        this.tabuSize = list.tabuSize;
+
+        initializeTabuList(list);
+    }
+
 
     public void addToTabuList(int indexA, int indexB) {
         // if already on the list return
@@ -53,6 +62,17 @@ public class TabuList {
         for (int i = 0; i < tabuList.length; i++) {
             for (int j = 0; j < tabuList.length; j++) {
                 tabuList[i][j] = new TabuListElement(false);
+            }
+        }
+    }
+
+    private void initializeTabuList(TabuList list) {
+        for (int i = 0; i < tabuList.length; i++) {
+            for (int j = 0; j < tabuList.length; j++) {
+                tabuList[i][j] = new TabuListElement(list.isOnTabuList(i, j));
+                if (list.isOnTabuList(i, j)) {
+                    addToTabuList(i, j);
+                }
             }
         }
     }
