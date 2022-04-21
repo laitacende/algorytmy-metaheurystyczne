@@ -92,7 +92,8 @@ public class TabuSearch {
                 tabuList.clearTabuList();
                 if (restartType == TabuRestartType.RANDOM) {
                     // start from new, random solution
-                    currentTour = NearestNeighbour.nearestNeighbour(graph, rand.nextInt(graph.vNo - 1) + 1);
+                    //currentTour = NearestNeighbour.nearestNeighbour(graph, rand.nextInt(graph.vNo - 1) + 1);
+                    currentTour = KRandom.generateRandomCycle(graph);
                 } else if (restartType == TabuRestartType.NEIGHBOUR) {
                     // get nearest neighbour solution starting with node not yet used
                     if (nextNeighbour == initNode) {
@@ -111,7 +112,6 @@ public class TabuSearch {
                     }
                 }
                 if (changeNeighbourhood) {
-                    System.out.println("changing");
                     neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
                     if (neighbourhoodCounter == 0) {
                         neighbourhood = new InsertNeighbourhood();
@@ -138,7 +138,8 @@ public class TabuSearch {
                     tabuList.clearTabuList();
                     if (restartType == TabuRestartType.RANDOM) {
                         // start from new, random solution
-                        currentTour = NearestNeighbour.nearestNeighbour(graph, rand.nextInt(graph.vNo - 1) + 1);
+                        //currentTour = NearestNeighbour.nearestNeighbour(graph, rand.nextInt(graph.vNo - 1) + 1);
+                        currentTour = KRandom.generateRandomCycle(graph);
                     } else if (restartType == TabuRestartType.NEIGHBOUR) {
                         // get nearest neighbour solution starting with node not yet used
                         if (nextNeighbour == initNode) {
