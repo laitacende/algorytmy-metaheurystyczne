@@ -21,4 +21,8 @@ public abstract class AbstractNeighbourhood {
     public abstract List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList,
                                                    Double globalBestDistance, int percent, int maxCount) throws NoNewNeighbourException;
 
+    public Double getCurrentBestDistance() {
+        return currentBestDistance;
+    }
+
 }
