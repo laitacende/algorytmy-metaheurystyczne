@@ -11,39 +11,39 @@ public class TabuSearch {
     private static final int TABU_SIZE = 13;
 
     // tabu search with extended neighbour result
-    public static  List<Integer> tabuSearchENN(Graph graph,AbstractNeighbourhood neighbourhood, TabuStopCondType stopCondType, TabuRestartType restartType,
+    public static  List<Integer> tabuSearchENN(Graph graph,AbstractNeighbourhood neighbourhood, TabuStopCondType stopCondType, TabuRestartType restartType, int tabuSize,
                                                int stopCondVal, int improvementPercent, int postImprovementCount, int backtrackMoves, boolean changeNeighbourhood) {
         List<Integer> startTour = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
-        return tabuSearch(graph, startTour, neighbourhood, stopCondType, restartType, stopCondVal, improvementPercent, postImprovementCount, backtrackMoves, changeNeighbourhood);
+        return tabuSearch(graph, startTour, neighbourhood, stopCondType, restartType, tabuSize, stopCondVal, improvementPercent, postImprovementCount, backtrackMoves, changeNeighbourhood);
     }
 
     public static  List<Integer> tabuSearchENN(Graph graph, TabuStopCondType stopCondType) {
         return tabuSearchENN(graph, new InvertNeighbourhood(), stopCondType, TabuRestartType.BACKTRACK,
-                10 * graph.vNo, 3, 100, 3, true);
+                13, 10 * graph.vNo, 3, 100, 3, true);
     }
 
-    public static  List<Integer> tabuSearchENN(Graph graph, int improvementPercent, int backtrackMoves, boolean changeN) {
+    public static  List<Integer> tabuSearchENN(Graph graph, int tabuSize, int improvementPercent, int backtrackMoves, boolean changeN) {
         return tabuSearchENN(graph, new InvertNeighbourhood(), TabuStopCondType.ITERATIONS_AMOUNT, TabuRestartType.BACKTRACK,
-                10 * graph.vNo, improvementPercent, 100, backtrackMoves, changeN);
+                tabuSize, 10 * graph.vNo, improvementPercent, 100, backtrackMoves, changeN);
     }
 
-    public static  List<Integer> tabuSearchENN(Graph graph, boolean changeN) {
+    public static  List<Integer> tabuSearchENN(Graph graph, boolean changeN, int tabuSize) {
         return tabuSearchENN(graph, new InvertNeighbourhood(), TabuStopCondType.ITERATIONS_AMOUNT, TabuRestartType.BACKTRACK,
-                10 * graph.vNo, 3, 100, 3, changeN);
+                tabuSize, 10 * graph.vNo, 3, 100, 3, changeN);
     }
 
 
     // tabu search with KRandom result
     public static  List<Integer> tabuSearchKR(Graph graph, AbstractNeighbourhood neighbourhood, TabuRestartType restartType, boolean changeNeighbourhood) {
         List<Integer> startTour = KRandom.generateRandomCycle(graph);
-        return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT,
-                restartType, 10 * graph.vNo, 100, 50, 2, changeNeighbourhood);
+        return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT, restartType,
+                13, 10 * graph.vNo, 100, 50, 2, changeNeighbourhood);
     }
 
 
 
     public static  List<Integer> tabuSearch(Graph graph, List<Integer> startTour, AbstractNeighbourhood neighbourhood, TabuStopCondType stopCondType, TabuRestartType restartType,
-                                            int stopCondVal, int improvementPercent, int postImprovementCount, int backtrackMoves, boolean changeNeighbourhood) {
+                                            int tabuSize, int stopCondVal, int improvementPercent, int postImprovementCount, int backtrackMoves, boolean changeNeighbourhood) {
 
         Random rand = new Random();
         List<Integer> currentTour = startTour;
@@ -52,7 +52,7 @@ public class TabuSearch {
         Double bestDistance = currentDistance;
 
         // To handle tabu list
-        TabuList tabuList = new TabuList(graph.vNo, TABU_SIZE);
+        TabuList tabuList = new TabuList(graph.vNo, tabuSize);
         Integer[] indexes = new Integer[2];
 
         // needed for restart with nearest neighbour
@@ -86,7 +86,7 @@ public class TabuSearch {
             }
             catch (NoNewNeighbourException ex) {
                 // when no new neighbour found due to tabu list
-                tabuList.resetTabuList();
+                tabuList.clearTabuList();
                 if (restartType == TabuRestartType.RANDOM) {
                     currentTour = KRandom.generateRandomCycle(graph);
                 }
@@ -145,7 +145,7 @@ public class TabuSearch {
 //                    currentTour = NearestNeighbour.nearestNeighbour(graph, rand.nextInt(graph.vNo - 1) + 1);
 //                    currentTour = KRandom.generateRandomCycle(graph);
 
-                    tabuList.resetTabuList();
+                    tabuList.clearTabuList();
                     if (restartType == TabuRestartType.RANDOM) {
                         currentTour = KRandom.generateRandomCycle(graph);
                     }
@@ -199,6 +199,7 @@ public class TabuSearch {
                 }
                 case ITERATIONS_AMOUNT -> {
                     if (iterationsAmount >= stopCondVal) {
+                        tabuList.printTabuList2();
                         return bestTour;
                     }
                 }

@@ -1,6 +1,7 @@
 package structures;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Queue;
 
@@ -58,10 +59,13 @@ public class TabuList {
         return tabuSize;
     }
 
-    public void resetTabuList() {
-        while (!tabuQueue.isEmpty()) {
-            tabuQueue.poll().value = false;
+    public void clearTabuList() {
+        for (TabuListElement[] tabuListElements : tabuList) {
+            for (int j = 0; j < tabuList.length; j++) {
+                tabuListElements[j].value = false;
+            }
         }
+        tabuQueue.clear();
     }
 
     private void initializeTabuList() {
@@ -90,6 +94,17 @@ public class TabuList {
             }
             System.out.println();
         }
+    }
+
+    public void printTabuList2() {
+        for (int i = 0; i < tabuList.length; i++) {
+            for (int j = 0; j < tabuList.length; j++) {
+                if(tabuList[i][j].value) {
+                    System.out.print("(" + i + ", " + j + ")  ; ");
+                }
+            }
+        }
+        System.out.println();
     }
 
     /**
