@@ -13,28 +13,30 @@ public class TabuSearch {
     private static final int TABU_SIZE = 13;
 
     // tabu search with extended neighbour result
-    public static  List<Integer> tabuSearchENN(Graph graph, AbstractNeighbourhood neighbourhood, TabuRestartType restartType, boolean changeNeighbourhood) {
+    public static  List<Integer> tabuSearchENN(Graph graph, AbstractNeighbourhood neighbourhood, TabuRestartType restartType,
+                                               boolean changeNeighbourhood, int tabuListSize) {
         List<Integer> startTour = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
         return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT,
-                restartType, 1000, 5, 100, 5, 11, changeNeighbourhood);
+                restartType, 1000, 5, 100, 10, changeNeighbourhood, tabuListSize);
     }
 
     // tabu search with KRandom result
-    public static  List<Integer> tabuSearchKR(Graph graph, AbstractNeighbourhood neighbourhood, TabuRestartType restartType, boolean changeNeighbourhood) {
+    public static  List<Integer> tabuSearchKR(Graph graph, AbstractNeighbourhood neighbourhood, TabuRestartType restartType,
+                                              boolean changeNeighbourhood, int tabuListSize) {
         List<Integer> startTour = KRandom.generateRandomCycle(graph);
         return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT,
-                restartType, 1000, 5, 100, 5, 11, changeNeighbourhood);
+                restartType, 1000, 5, 100, 10, changeNeighbourhood, tabuListSize);
     }
 
     public static  List<Integer> tabuSearch(Graph graph, List<Integer> startTour, AbstractNeighbourhood neighbourhood,
                                             TabuStopCondType stopCondType, TabuRestartType restartType, int stopCondVal, int percent, int maxCount,
-                                            int backTrackVal, int backtrackMoves, boolean changeNeighbourhood) {
+                                            int backtrackMoves, boolean changeNeighbourhood, int tabuListSize) {
 
         long startTime = System.currentTimeMillis();
 
         Random rand = new Random();
 
-        TabuList tabuList = new TabuList(graph.vNo, TABU_SIZE);
+        TabuList tabuList = new TabuList(graph.vNo, tabuListSize);
         Integer[] indexes = new Integer[2];
         List<Integer> currentTour = startTour;
         List<Integer> bestTour = startTour;
@@ -67,23 +69,8 @@ public class TabuSearch {
             try {
                 currentTour = neighbourhood.getBestNeighbour(currentTour, graph, indexes, tabuList, bestDistance, percent, maxCount);
 
-                // if restart type is backtracking and solution is 'promising'
-                if (addNextMove == -1 && restartType == TabuRestartType.BACKTRACK && (Math.abs(neighbourhood.getCurrentBestDistance() - bestDistance)) / bestDistance > (double) backTrackVal / 100) {
-                    backtrackList.addPermutation(currentTour);
-                    addNextMove = 0;
-                }
-
                 // add move to tabu list
                 tabuList.addToTabuList(indexes[0], indexes[1]);
-
-                if (addNextMove != -1) {
-                    addNextMove++;
-                }
-                // there were sufficient iterations to add new value to backtracking list
-                if (restartType == TabuRestartType.BACKTRACK && addNextMove == backtrackMoves) {
-                    backtrackList.addTabuList(tabuList);
-                    addNextMove = -1;
-                }
 
             }
             catch (NoNewNeighbourException e) {
@@ -128,6 +115,12 @@ public class TabuSearch {
                 bestTour = currentTour;
                 bestDistance = CostFunction.calcCostFunction(bestTour, graph);
                 noImprovementCounter = 0;
+
+                // if restart type is backtracking and solution is better than the current one
+                if (addNextMove == -1 && restartType == TabuRestartType.BACKTRACK) {
+                    backtrackList.addPermutation(currentTour);
+                    addNextMove = 0;
+                }
             }
             else {
                 noImprovementCounter++;
@@ -169,6 +162,15 @@ public class TabuSearch {
                         }
                     }
                 }
+            }
+
+            if (addNextMove != -1) {
+                addNextMove++;
+            }
+            // there were sufficient iterations to add new value to backtracking list
+            if (restartType == TabuRestartType.BACKTRACK && addNextMove == backtrackMoves) {
+                backtrackList.addTabuList(tabuList);
+                addNextMove = -1;
             }
 
 
