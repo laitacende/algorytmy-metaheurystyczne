@@ -58,6 +58,12 @@ public class TabuList {
         return tabuSize;
     }
 
+    public void resetTabuList() {
+        while (!tabuQueue.isEmpty()) {
+            tabuQueue.poll().value = false;
+        }
+    }
+
     private void initializeTabuList() {
         for (int i = 0; i < tabuList.length; i++) {
             for (int j = 0; j < tabuList.length; j++) {
@@ -84,15 +90,6 @@ public class TabuList {
             }
             System.out.println();
         }
-    }
-
-    public void clearTabuList() {
-        for (TabuListElement[] tabuListElements : tabuList) {
-            for (int j = 0; j < tabuList.length; j++) {
-                tabuListElements[j].value = false;
-            }
-        }
-        tabuQueue.clear();
     }
 
     /**

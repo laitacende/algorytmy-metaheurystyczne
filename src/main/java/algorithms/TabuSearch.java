@@ -2,118 +2,129 @@ package algorithms;
 
 import custom_exceptions.NoNewNeighbourException;
 import structures.BacktrackList;
-import structures.Coordinates;
 import structures.Graph;
 import structures.TabuList;
 import utils.*;
-
 import java.util.*;
 
 public class TabuSearch {
     private static final int TABU_SIZE = 13;
 
     // tabu search with extended neighbour result
-    public static  List<Integer> tabuSearchENN(Graph graph, AbstractNeighbourhood neighbourhood, TabuRestartType restartType,
-                                               boolean changeNeighbourhood, int tabuListSize) {
+    public static  List<Integer> tabuSearchENN(Graph graph,AbstractNeighbourhood neighbourhood, TabuStopCondType stopCondType, TabuRestartType restartType,
+                                               int stopCondVal, int improvementPercent, int postImprovementCount, int backtrackMoves, boolean changeNeighbourhood) {
         List<Integer> startTour = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
-        return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT,
-                restartType, 1000, 5, 100, 10, changeNeighbourhood, tabuListSize);
+        return tabuSearch(graph, startTour, neighbourhood, stopCondType, restartType, stopCondVal, improvementPercent, postImprovementCount, backtrackMoves, changeNeighbourhood);
     }
+
+    public static  List<Integer> tabuSearchENN(Graph graph, TabuStopCondType stopCondType) {
+        return tabuSearchENN(graph, new InvertNeighbourhood(), stopCondType, TabuRestartType.BACKTRACK,
+                10 * graph.vNo, 3, 100, 3, true);
+    }
+
+    public static  List<Integer> tabuSearchENN(Graph graph, int improvementPercent, int backtrackMoves, boolean changeN) {
+        return tabuSearchENN(graph, new InvertNeighbourhood(), TabuStopCondType.ITERATIONS_AMOUNT, TabuRestartType.BACKTRACK,
+                10 * graph.vNo, improvementPercent, 100, backtrackMoves, changeN);
+    }
+
+    public static  List<Integer> tabuSearchENN(Graph graph, boolean changeN) {
+        return tabuSearchENN(graph, new InvertNeighbourhood(), TabuStopCondType.ITERATIONS_AMOUNT, TabuRestartType.BACKTRACK,
+                10 * graph.vNo, 3, 100, 3, changeN);
+    }
+
 
     // tabu search with KRandom result
-    public static  List<Integer> tabuSearchKR(Graph graph, AbstractNeighbourhood neighbourhood, TabuRestartType restartType,
-                                              boolean changeNeighbourhood, int tabuListSize) {
+    public static  List<Integer> tabuSearchKR(Graph graph, AbstractNeighbourhood neighbourhood, TabuRestartType restartType, boolean changeNeighbourhood) {
         List<Integer> startTour = KRandom.generateRandomCycle(graph);
         return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT,
-                restartType, 1000, 5, 100, 10, changeNeighbourhood, tabuListSize);
+                restartType, 10 * graph.vNo, 100, 50, 2, changeNeighbourhood);
     }
 
-    public static  List<Integer> tabuSearch(Graph graph, List<Integer> startTour, AbstractNeighbourhood neighbourhood,
-                                            TabuStopCondType stopCondType, TabuRestartType restartType, int stopCondVal, int percent, int maxCount,
-                                            int backtrackMoves, boolean changeNeighbourhood, int tabuListSize) {
 
-        long startTime = System.currentTimeMillis();
+
+    public static  List<Integer> tabuSearch(Graph graph, List<Integer> startTour, AbstractNeighbourhood neighbourhood, TabuStopCondType stopCondType, TabuRestartType restartType,
+                                            int stopCondVal, int improvementPercent, int postImprovementCount, int backtrackMoves, boolean changeNeighbourhood) {
 
         Random rand = new Random();
-
-        TabuList tabuList = new TabuList(graph.vNo, tabuListSize);
-        Integer[] indexes = new Integer[2];
         List<Integer> currentTour = startTour;
+        Double currentDistance = CostFunction.calcCostFunction(startTour, graph);
         List<Integer> bestTour = startTour;
-        Double bestDistance = CostFunction.calcCostFunction(startTour, graph);
+        Double bestDistance = currentDistance;
+
+        // To handle tabu list
+        TabuList tabuList = new TabuList(graph.vNo, TABU_SIZE);
+        Integer[] indexes = new Integer[2];
+
         // needed for restart with nearest neighbour
         int nextNeighbour = 1;
         int initNode = startTour.get(0);
 
         // needed for backtracking restart
-        BacktrackList backtrackList = new BacktrackList(TABU_SIZE);
-        int addNextMove = -1;
-
+        BacktrackList backtrackList = new BacktrackList(20);
         backtrackList.addPermutation(currentTour);
-        addNextMove = 0; // start counting
+        int addNextMove = 0; // start counting
 
-        int iterationsAmount = 0;
-        int noImprovementCounter = 0;
-
-        int neighbourhoodCounter = 0;
-        if (neighbourhood.getClass() == InsertNeighbourhood.class) {
+        // to change neighbours
+        int neighbourhoodCounter;
+        if (neighbourhood.getClass() == InsertNeighbourhood.class)
             neighbourhoodCounter = 0;
-        } else if (neighbourhood.getClass() == InvertNeighbourhood.class) {
+        else if (neighbourhood.getClass() == InvertNeighbourhood.class)
             neighbourhoodCounter = 1;
-        } else if (neighbourhood.getClass() == SwapNeighbourhood.class) {
+        else
             neighbourhoodCounter = 2;
-        }
+
+        // to handle stop cond
+        long startTime = System.currentTimeMillis();
+        int noImprovementCounter = 0;
+        int iterationsAmount = 0;
 
         while (true) {
-            // search neighbourhood
             try {
-                currentTour = neighbourhood.getBestNeighbour(currentTour, graph, indexes, tabuList, bestDistance, percent, maxCount);
-
-                // add move to tabu list
-                tabuList.addToTabuList(indexes[0], indexes[1]);
-
+                // search for best solution in neighbourhood
+                currentTour = neighbourhood.getBestNeighbour(currentTour, graph, indexes, tabuList, bestDistance, improvementPercent, postImprovementCount);
+                tabuList.addToTabuList(indexes[0], indexes[1]); // add move to tabu list
             }
-            catch (NoNewNeighbourException e) {
+            catch (NoNewNeighbourException ex) {
                 // when no new neighbour found due to tabu list
-                // clear tabu list
-                tabuList.clearTabuList();
+                tabuList.resetTabuList();
                 if (restartType == TabuRestartType.RANDOM) {
-                    // start from new, random solution
-                    //currentTour = NearestNeighbour.nearestNeighbour(graph, rand.nextInt(graph.vNo - 1) + 1);
                     currentTour = KRandom.generateRandomCycle(graph);
-                } else if (restartType == TabuRestartType.NEIGHBOUR) {
+                }
+                else if (restartType == TabuRestartType.NEIGHBOUR) {
                     // get nearest neighbour solution starting with node not yet used
-                    if (nextNeighbour == initNode) {
+                    if (nextNeighbour == initNode)
                         nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
-                    }
+
                     currentTour = NearestNeighbour.nearestNeighbour(graph, nextNeighbour);
                     nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
-                } else if (restartType == TabuRestartType.BACKTRACK && addNextMove == -1) { // backtrack to previous 'promising' solution
-                    // get permutation from backtracking list and add move that was performed after on tabu list
-                    // to avoid following the same path again
+                }
+                else if (restartType == TabuRestartType.BACKTRACK && addNextMove == -1) {
+                    // backtrack to previous 'promising' solution
                     currentTour = backtrackList.getPermutation();
                     if (currentTour != null ) {
-                        tabuList = backtrackList.getTabuList();
-                    } else {
-                        currentTour = NearestNeighbour.nearestNeighbour(graph, rand.nextInt(graph.vNo - 1) + 1);
+                        tabuList = backtrackList.getTabuList(); // restore solution tabu list
+                    }
+                    else {
+                        // get nearest neighbour solution starting with node not yet used
+                        if (nextNeighbour == initNode)
+                            nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
+
+                        currentTour = NearestNeighbour.nearestNeighbour(graph, nextNeighbour);
+                        nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
                     }
                 }
                 if (changeNeighbourhood) {
                     neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
-                    if (neighbourhoodCounter == 0) {
-                        neighbourhood = new InsertNeighbourhood();
-                    } else if (neighbourhoodCounter == 1) {
-                        neighbourhood = new InvertNeighbourhood();
-                    } else if (neighbourhoodCounter == 2) {
-                        neighbourhood = new SwapNeighbourhood();
-                    }
+                    neighbourhood = changeNeighbourhood(neighbourhoodCounter);
                 }
             }
 
+            currentDistance = CostFunction.calcCostFunction(currentTour, graph);
+
             // if found new best tour save it
-            if (CostFunction.calcCostFunction(currentTour, graph) < bestDistance) {
+            if (currentDistance < bestDistance) {
                 bestTour = currentTour;
-                bestDistance = CostFunction.calcCostFunction(bestTour, graph);
+                bestDistance = currentDistance;
                 noImprovementCounter = 0;
 
                 // if restart type is backtracking and solution is better than the current one
@@ -126,40 +137,45 @@ public class TabuSearch {
                 noImprovementCounter++;
 
                 // When no good solution found in a really long time
-                if (noImprovementCounter > stopCondVal && stopCondType == TabuStopCondType.NO_IMPROVEMENT) {
-                    // clear tabu list
-                    tabuList.clearTabuList();
+                if (noImprovementCounter > stopCondVal / 5 && stopCondType != TabuStopCondType.NO_IMPROVEMENT) {
+                    // reset counter
+                    noImprovementCounter = 0;
+
+                    // optional, one of these resets
+//                    currentTour = NearestNeighbour.nearestNeighbour(graph, rand.nextInt(graph.vNo - 1) + 1);
+//                    currentTour = KRandom.generateRandomCycle(graph);
+
+                    tabuList.resetTabuList();
                     if (restartType == TabuRestartType.RANDOM) {
-                        // start from new, random solution
-                        //currentTour = NearestNeighbour.nearestNeighbour(graph, rand.nextInt(graph.vNo - 1) + 1);
                         currentTour = KRandom.generateRandomCycle(graph);
-                    } else if (restartType == TabuRestartType.NEIGHBOUR) {
+                    }
+                    else if (restartType == TabuRestartType.NEIGHBOUR) {
                         // get nearest neighbour solution starting with node not yet used
-                        if (nextNeighbour == initNode) {
+                        if (nextNeighbour == initNode)
                             nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
-                        }
+
                         currentTour = NearestNeighbour.nearestNeighbour(graph, nextNeighbour);
                         nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
-                    } else if (restartType == TabuRestartType.BACKTRACK) { // backtrack to previous 'promising' solution
-                        // get permutation from backtracking list and add move that was performed after on tabu list
-                        // to avoid following the same path again
+                    }
+                    else if (restartType == TabuRestartType.BACKTRACK && addNextMove == -1) {
+                        // backtrack to previous 'promising' solution
                         currentTour = backtrackList.getPermutation();
                         if (currentTour != null ) {
-                            tabuList = backtrackList.getTabuList();
-                        } else {
-                            currentTour = NearestNeighbour.nearestNeighbour(graph, rand.nextInt(graph.vNo - 1) + 1);
+                            tabuList = backtrackList.getTabuList(); // restore solution tabu list
+                        }
+                        else {
+                            // get nearest neighbour solution starting with node not yet used
+                            if (nextNeighbour == initNode)
+                                nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
+
+                            currentTour = NearestNeighbour.nearestNeighbour(graph, nextNeighbour);
+                            nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
                         }
                     }
 
                     if (changeNeighbourhood) {
                         neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
-                        if (neighbourhoodCounter == 0) {
-                            neighbourhood = new InsertNeighbourhood();
-                        } else if (neighbourhoodCounter == 1) {
-                            neighbourhood = new InvertNeighbourhood();
-                        } else if (neighbourhoodCounter == 2) {
-                            neighbourhood = new SwapNeighbourhood();
-                        }
+                        neighbourhood = changeNeighbourhood(neighbourhoodCounter);
                     }
                 }
             }
@@ -172,7 +188,6 @@ public class TabuSearch {
                 backtrackList.addTabuList(tabuList);
                 addNextMove = -1;
             }
-
 
 
             // checking whether to stop the algorithm
@@ -198,4 +213,15 @@ public class TabuSearch {
         }
     }
 
+    private static AbstractNeighbourhood changeNeighbourhood(int neighbourhoodCounter) {
+        if (neighbourhoodCounter == 0) {
+             return new InsertNeighbourhood();
+        }
+        else if (neighbourhoodCounter == 1) {
+            return new InvertNeighbourhood();
+        }
+        else {
+            return new SwapNeighbourhood();
+        }
+    }
 }

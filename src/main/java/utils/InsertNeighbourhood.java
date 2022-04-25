@@ -11,15 +11,15 @@ public class InsertNeighbourhood extends AbstractNeighbourhood {
 
     @Override
     public List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList,
-                                          Double globalBestDistance, int percent, int maxCount) throws NoNewNeighbourException {
+                                          Double globalBestDistance, int improvementPercent, int postImprovementCount) throws NoNewNeighbourException {
 
-        currentPermutation = new ArrayList<>(permutation);
+        initialPermutation = new ArrayList<>(permutation);
         currentBestPermutation = new ArrayList<>(permutation);
 
-        currentDistance = CostFunction.calcCostFunction(currentPermutation, graph);
-        currentBestDistance = currentDistance;
+        initialDistance = CostFunction.calcCostFunction(initialPermutation, graph);
+        currentBestDistance = initialDistance;
 
-        size = currentPermutation.size();
+        size = initialPermutation.size();
         counter = Integer.MIN_VALUE;
 
         // insertion
@@ -29,21 +29,22 @@ public class InsertNeighbourhood extends AbstractNeighbourhood {
                 // skip all below when i = j
                 if (i == j) continue;
 
-                newPermutation = new ArrayList<>(currentPermutation);
-                newDistance = currentDistance;
-                newDistance -= graph.getEdge(currentPermutation.get(Math.floorMod(i - 1, size)), currentPermutation.get(i));
-                newDistance -= graph.getEdge(currentPermutation.get(i), currentPermutation.get(Math.floorMod(i + 1, size)));
-                Integer inserted = currentPermutation.get(i);
+                newPermutation = new ArrayList<>(initialPermutation);
+                newDistance = initialDistance;
+
+                newDistance -= graph.getEdge(initialPermutation.get(Math.floorMod(i - 1, size)), initialPermutation.get(i));
+                newDistance -= graph.getEdge(initialPermutation.get(i), initialPermutation.get(Math.floorMod(i + 1, size)));
+                Integer inserted = initialPermutation.get(i);
 
                 // get ith element
                 if (i < j) { // shift from i + 1 to jth to left
                     if (Math.floorMod(j + 1, size) != i) {
-                        newDistance -= graph.getEdge(currentPermutation.get(j), currentPermutation.get(Math.floorMod(j + 1, size)));
+                        newDistance -= graph.getEdge(initialPermutation.get(j), initialPermutation.get(Math.floorMod(j + 1, size)));
                     }
 
                     int k = i + 1;
                     while (k <= j) {
-                        newPermutation.set(k - 1, currentPermutation.get(k));
+                        newPermutation.set(k - 1, initialPermutation.get(k));
                         k++;
                     }
 
@@ -52,11 +53,11 @@ public class InsertNeighbourhood extends AbstractNeighbourhood {
                 }
                 else { // shift from jth to ith right
                     if (Math.floorMod(j - 1, size) != i) {
-                        newDistance -= graph.getEdge(currentPermutation.get(Math.floorMod(j - 1, size)), currentPermutation.get(j));
+                        newDistance -= graph.getEdge(initialPermutation.get(Math.floorMod(j - 1, size)), initialPermutation.get(j));
                     }
                     int k = j;
                     while (k < i) {
-                        newPermutation.set(k + 1, currentPermutation.get(k));
+                        newPermutation.set(k + 1, initialPermutation.get(k));
                         k++;
                     }
                     newPermutation.set(j, inserted);
@@ -70,17 +71,24 @@ public class InsertNeighbourhood extends AbstractNeighbourhood {
                     newDistance += graph.getEdge(newPermutation.get(Math.floorMod(j - 1, size)), newPermutation.get(j));
                 }
 
-                // if permutation is better than global best solution add regardless
+
+                // if permutation is better than global best solution -  use regardless
                 if (newDistance < globalBestDistance) {
                     currentBestPermutation = new ArrayList<>(newPermutation);
                     currentBestDistance = newDistance;
                     indexes[0] = i;
                     indexes[1] = j;
                 }
-                // if permutation is better and not on tabu list
                 else if (newDistance < currentBestDistance && !tabuList.isOnTabuList(i, j)) {
-                    // if there is improvement - reset counter
-                    if (newDistance / currentBestDistance > (double) percent / 100) { counter = 0; }
+                    // if found decent improvement start counter
+                    if (((currentBestDistance - newDistance) / currentBestDistance) > ((double) improvementPercent / 100.0)) {
+                        counter = 0;
+                    }
+
+                    // reset counter when found better sollution in some steps
+                    if (counter > 0) {
+                        counter = 0;
+                    }
 
                     currentBestPermutation = new ArrayList<>(newPermutation);
                     currentBestDistance = newDistance;
@@ -89,17 +97,16 @@ public class InsertNeighbourhood extends AbstractNeighbourhood {
                 }
                 else {
                     counter++;
-
-                    // when there is no improvement - stop
-                    if (counter > maxCount) {
-                        return currentBestPermutation;
+                    if (counter > postImprovementCount) {
+                        return currentBestPermutation;  // when there is no improvement - stop
                     }
                 }
             }
         }
 
         // when no new neighbour found
-        if (currentBestPermutation.equals(currentPermutation)) throw new NoNewNeighbourException();
+        if (currentBestPermutation.equals(initialPermutation))
+            throw new NoNewNeighbourException();
 
         return currentBestPermutation;
     }

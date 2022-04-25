@@ -7,11 +7,11 @@ import java.util.List;
 
 
 public abstract class AbstractNeighbourhood {
-    List<Integer> currentPermutation;
+    List<Integer> initialPermutation;
     List<Integer> currentBestPermutation;
     List<Integer> newPermutation;
 
-    Double currentDistance;
+    Double initialDistance;
     Double currentBestDistance;
     Double newDistance;
 
@@ -19,10 +19,6 @@ public abstract class AbstractNeighbourhood {
     int size;
 
     public abstract List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList,
-                                                   Double globalBestDistance, int percent, int maxCount) throws NoNewNeighbourException;
-
-    public Double getCurrentBestDistance() {
-        return currentBestDistance;
-    }
+                                                   Double globalBestDistance, int improvementPercent, int postImprovementCount) throws NoNewNeighbourException;
 
 }

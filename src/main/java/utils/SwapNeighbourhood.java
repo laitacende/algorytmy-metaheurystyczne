@@ -11,36 +11,36 @@ public class SwapNeighbourhood extends AbstractNeighbourhood  {
 
     @Override
     public List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList,
-                                          Double globalBestDistance, int percent, int maxCount) throws NoNewNeighbourException {
+                                          Double globalBestDistance, int improvementPercent, int postImprovementCount) throws NoNewNeighbourException {
 
-        currentPermutation = new ArrayList<>(permutation);
+        initialPermutation = new ArrayList<>(permutation);
         currentBestPermutation = new ArrayList<>(permutation);
 
-        currentDistance = CostFunction.calcCostFunction(currentPermutation, graph);
-        currentBestDistance = currentDistance;
+        initialDistance = CostFunction.calcCostFunction(initialPermutation, graph);
+        currentBestDistance = initialDistance;
 
-        size = currentPermutation.size();
+        size = initialPermutation.size();
         counter = Integer.MIN_VALUE;
 
         // swap
         for (int i = 0; i < graph.vNo - 2; i++) { // don't consider the last node - there is nothing to invert
             for (int j = i + 1; j < size; j++) { // check from position 'onwards'
 
-                newPermutation = new ArrayList<>(currentPermutation);
-                newDistance = currentDistance;
+                newPermutation = new ArrayList<>(initialPermutation);
+                newDistance = initialDistance;
 
                 // swap i and j
-                newPermutation.set(j, currentPermutation.get(i));
-                newPermutation.set(i, currentPermutation.get(j));
+                newPermutation.set(j, initialPermutation.get(i));
+                newPermutation.set(i, initialPermutation.get(j));
 
                 // update distance
-                newDistance -= graph.getEdge(currentPermutation.get(Math.floorMod(i - 1, size)), currentPermutation.get(i));
-                newDistance -= graph.getEdge(currentPermutation.get(i), currentPermutation.get(Math.floorMod(i + 1, size)));
+                newDistance -= graph.getEdge(initialPermutation.get(Math.floorMod(i - 1, size)), initialPermutation.get(i));
+                newDistance -= graph.getEdge(initialPermutation.get(i), initialPermutation.get(Math.floorMod(i + 1, size)));
                 if (j != Math.floorMod(i + 1, size)) {
-                    newDistance -= graph.getEdge(currentPermutation.get(Math.floorMod(j - 1, size)), currentPermutation.get(j));
+                    newDistance -= graph.getEdge(initialPermutation.get(Math.floorMod(j - 1, size)), initialPermutation.get(j));
                 }
                 if (i != Math.floorMod(j + 1, size)) {
-                    newDistance -= graph.getEdge(currentPermutation.get(j), currentPermutation.get(Math.floorMod(j + 1, size)));
+                    newDistance -= graph.getEdge(initialPermutation.get(j), initialPermutation.get(Math.floorMod(j + 1, size)));
                 }
                 newDistance += graph.getEdge(newPermutation.get(Math.floorMod(i - 1, size)), newPermutation.get(i));
                 newDistance += graph.getEdge(newPermutation.get(i), newPermutation.get(Math.floorMod(i + 1, size)));
@@ -51,17 +51,24 @@ public class SwapNeighbourhood extends AbstractNeighbourhood  {
                     newDistance += graph.getEdge(newPermutation.get(j), newPermutation.get(Math.floorMod(j + 1, size)));
                 }
 
-                // if permutation is better than global best solution add regardless
+
+                // if permutation is better than global best solution -  use regardless
                 if (newDistance < globalBestDistance) {
                     currentBestPermutation = new ArrayList<>(newPermutation);
                     currentBestDistance = newDistance;
                     indexes[0] = i;
                     indexes[1] = j;
                 }
-                // if permutation is better and not on tabu list
                 else if (newDistance < currentBestDistance && !tabuList.isOnTabuList(i, j)) {
-                    // if there is improvement - reset counter
-                    if (newDistance / currentBestDistance > (double) percent / 100) { counter = 0; }
+                    // if found decent improvement start counter
+                    if (((currentBestDistance - newDistance) / currentBestDistance) > ((double) improvementPercent / 100.0)) {
+                        counter = 0;
+                    }
+
+                    // reset counter when found better sollution in some steps
+                    if (counter > 0) {
+                        counter = 0;
+                    }
 
                     currentBestPermutation = new ArrayList<>(newPermutation);
                     currentBestDistance = newDistance;
@@ -70,17 +77,17 @@ public class SwapNeighbourhood extends AbstractNeighbourhood  {
                 }
                 else {
                     counter++;
-
-                    // when there is no improvement - stop
-                    if (counter > maxCount) {
-                        return currentBestPermutation;
+                    if (counter > postImprovementCount) {
+                        return currentBestPermutation;  // when there is no improvement - stop
                     }
                 }
             }
         }
 
         // when no new neighbour found
-        if (currentBestPermutation.equals(currentPermutation)) throw new NoNewNeighbourException();
+        if (currentBestPermutation.equals(initialPermutation)) {
+            throw new NoNewNeighbourException();
+        }
 
         return currentBestPermutation;
     }
