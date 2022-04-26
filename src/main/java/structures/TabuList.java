@@ -24,7 +24,7 @@ public class TabuList {
     // to make copy of list passed as an argument
     public TabuList(TabuList list) {
         this.tabuList = new TabuListElement[list.tabuList.length][list.tabuList.length];
-        this.tabuQueue = new ArrayDeque<>();
+        this.tabuQueue = new ArrayDeque<>(list.tabuQueue);
         this.costFunValues = new ArrayList<>(list.costFunValues);
         this.tabuSize = list.tabuSize;
 
@@ -93,9 +93,6 @@ public class TabuList {
         for (int i = 0; i < this.tabuList.length; i++) {
             for (int j = 0; j < this.tabuList.length; j++) {
                 this.tabuList[i][j] = new TabuListElement(list.tabuList[i][j].value);
-                if (tabuList[i][j].value) {
-                    this.tabuQueue.add(tabuList[i][j]);
-                }
             }
         }
     }
