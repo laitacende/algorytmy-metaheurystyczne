@@ -9,11 +9,13 @@ import java.util.Queue;
 public class TabuList {
     private final TabuListElement[][] tabuList;
     private final Queue<TabuListElement> tabuQueue;
+    private final ArrayList<Double> costFunValues;
     private final int tabuSize;
 
     public TabuList(int listSize, int tabuSize) {
         this.tabuList = new TabuListElement[listSize][listSize];
         this.tabuQueue = new ArrayDeque<>();
+        this.costFunValues = new ArrayList<>();
         this.tabuSize = tabuSize;
 
         initializeTabuList();
@@ -23,23 +25,29 @@ public class TabuList {
     public TabuList(TabuList list) {
         this.tabuList = new TabuListElement[list.tabuList.length][list.tabuList.length];
         this.tabuQueue = new ArrayDeque<>();
+        this.costFunValues = new ArrayList<>(list.costFunValues);
         this.tabuSize = list.tabuSize;
 
         initializeTabuList(list);
     }
 
 
-    public void addToTabuList(int indexA, int indexB) {
+    public void addToTabuList(int indexA, int indexB, Double distance) {
         // if already on the list return
         if (tabuList[indexA][indexB].value) return;
 
         tabuList[indexA][indexB].value = true;
         tabuQueue.add(tabuList[indexA][indexB]);
-
-        // if overflows the size remove oldest element
+        // if overflows the size remove the oldest element
         if (tabuQueue.size() > tabuSize) {
             Objects.requireNonNull(tabuQueue.poll()).value = false;
         }
+
+        costFunValues.add(distance);
+        if(costFunValues.size() > tabuSize) {
+            costFunValues.remove(0);
+        }
+
     }
 
     public void removeFromTabuList(int indexA, int indexB) {
@@ -47,7 +55,12 @@ public class TabuList {
         tabuQueue.remove(tabuList[indexA][indexB]);
     }
 
-    public boolean isOnTabuList(int indexA, int indexB) {
+    public boolean isOnTabuList(int indexA, int indexB, double distance) {
+//        for (Double value : this.costFunValues) {
+//            if (Math.abs(value - distance) < 0.0001) {
+//                return true;
+//            }
+//        }
         return tabuList[indexA][indexB].value;
     }
 
@@ -77,11 +90,11 @@ public class TabuList {
     }
 
     private void initializeTabuList(TabuList list) {
-        for (int i = 0; i < tabuList.length; i++) {
-            for (int j = 0; j < tabuList.length; j++) {
-                tabuList[i][j] = new TabuListElement(list.isOnTabuList(i, j));
-                if (list.isOnTabuList(i, j)) {
-                    addToTabuList(i, j);
+        for (int i = 0; i < this.tabuList.length; i++) {
+            for (int j = 0; j < this.tabuList.length; j++) {
+                this.tabuList[i][j] = new TabuListElement(list.tabuList[i][j].value);
+                if (tabuList[i][j].value) {
+                    this.tabuQueue.add(tabuList[i][j]);
                 }
             }
         }

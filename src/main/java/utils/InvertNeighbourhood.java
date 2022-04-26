@@ -17,7 +17,7 @@ public class InvertNeighbourhood extends AbstractNeighbourhood {
         currentBestPermutation = new ArrayList<>(permutation);
 
         initialDistance = CostFunction.calcCostFunction(initialPermutation, graph);
-        currentBestDistance = initialDistance;
+        currentBestDistance = Double.MAX_VALUE;
 
         size = initialPermutation.size();
         counter = Integer.MIN_VALUE;
@@ -47,15 +47,15 @@ public class InvertNeighbourhood extends AbstractNeighbourhood {
 
 
                 // if permutation is better than global best solution -  use regardless
-                if (newDistance < globalBestDistance) {
+                if (newDistance.intValue() < globalBestDistance.intValue()) {
                     currentBestPermutation = new ArrayList<>(newPermutation);
                     currentBestDistance = newDistance;
                     indexes[0] = i;
                     indexes[1] = j;
                 }
-                else if (newDistance < currentBestDistance && !tabuList.isOnTabuList(i, j)) {
+                else if (newDistance < currentBestDistance && !tabuList.isOnTabuList(i, j, newDistance)) {
                     // if found decent improvement start counter
-                    if (((currentBestDistance - newDistance) / currentBestDistance) > ((double) improvementPercent / 100.0)) {
+                    if (((currentBestDistance - newDistance) / currentBestDistance) > ((double) improvementPercent / 100.0) && currentBestDistance != Double.MAX_VALUE) {
                         counter = 0;
                     }
 

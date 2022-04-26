@@ -5,7 +5,8 @@ import structures.BacktrackList;
 import structures.Graph;
 import structures.TabuList;
 import utils.*;
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 
 public class TabuSearch {
     private static final int TABU_SIZE = 13;
@@ -18,18 +19,18 @@ public class TabuSearch {
     }
 
     public static  List<Integer> tabuSearchENN(Graph graph, TabuStopCondType stopCondType) {
-        return tabuSearchENN(graph, new InvertNeighbourhood(), stopCondType, TabuRestartType.BACKTRACK,
-                13, 10 * graph.vNo, 3, 100, 3, true);
+        return tabuSearchENN(graph, new InvertNeighbourhood(), stopCondType, TabuRestartType.NEIGHBOUR,
+                15, 10 * graph.vNo, 3, 100, 2, true);
     }
 
     public static  List<Integer> tabuSearchENN(Graph graph, int tabuSize, int improvementPercent, int backtrackMoves, boolean changeN) {
-        return tabuSearchENN(graph, new InvertNeighbourhood(), TabuStopCondType.ITERATIONS_AMOUNT, TabuRestartType.BACKTRACK,
+        return tabuSearchENN(graph, new InvertNeighbourhood(), TabuStopCondType.ITERATIONS_AMOUNT, TabuRestartType.NEIGHBOUR,
                 tabuSize, 10 * graph.vNo, improvementPercent, 100, backtrackMoves, changeN);
     }
 
     public static  List<Integer> tabuSearchENN(Graph graph, boolean changeN, int tabuSize) {
         return tabuSearchENN(graph, new InvertNeighbourhood(), TabuStopCondType.ITERATIONS_AMOUNT, TabuRestartType.BACKTRACK,
-                tabuSize, 10 * graph.vNo, 3, 100, 3, changeN);
+                tabuSize, 10 * graph.vNo, 3, 500, 2, changeN);
     }
 
 
@@ -45,7 +46,7 @@ public class TabuSearch {
     public static  List<Integer> tabuSearch(Graph graph, List<Integer> startTour, AbstractNeighbourhood neighbourhood, TabuStopCondType stopCondType, TabuRestartType restartType,
                                             int tabuSize, int stopCondVal, int improvementPercent, int postImprovementCount, int backtrackMoves, boolean changeNeighbourhood) {
 
-        Random rand = new Random();
+        //Random rand = new Random();
         List<Integer> currentTour = startTour;
         Double currentDistance = CostFunction.calcCostFunction(startTour, graph);
         List<Integer> bestTour = startTour;
@@ -59,11 +60,6 @@ public class TabuSearch {
         int nextNeighbour = 1;
         int initNode = startTour.get(0);
 
-        // needed for backtracking restart
-        BacktrackList backtrackList = new BacktrackList(20);
-        backtrackList.addPermutation(currentTour);
-        int addNextMove = 0; // start counting
-
         // to change neighbours
         int neighbourhoodCounter;
         if (neighbourhood.getClass() == InsertNeighbourhood.class)
@@ -72,6 +68,12 @@ public class TabuSearch {
             neighbourhoodCounter = 1;
         else
             neighbourhoodCounter = 2;
+
+        // needed for backtracking restart
+        BacktrackList backtrackList = new BacktrackList(50);
+        backtrackList.addPermutation(currentTour, neighbourhoodCounter);
+        int addNextMove = 0; // start counting
+
 
         // to handle stop cond
         long startTime = System.currentTimeMillis();
@@ -82,13 +84,18 @@ public class TabuSearch {
             try {
                 // search for best solution in neighbourhood
                 currentTour = neighbourhood.getBestNeighbour(currentTour, graph, indexes, tabuList, bestDistance, improvementPercent, postImprovementCount);
-                tabuList.addToTabuList(indexes[0], indexes[1]); // add move to tabu list
+                tabuList.addToTabuList(indexes[0], indexes[1], CostFunction.calcCostFunction(currentTour, graph)); // add move to tabu list
             }
             catch (NoNewNeighbourException ex) {
                 // when no new neighbour found due to tabu list
                 tabuList.clearTabuList();
                 if (restartType == TabuRestartType.RANDOM) {
                     currentTour = KRandom.generateRandomCycle(graph);
+
+                    if (changeNeighbourhood) {
+                        neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
+                        neighbourhood = changeNeighbourhood(neighbourhoodCounter);
+                    }
                 }
                 else if (restartType == TabuRestartType.NEIGHBOUR) {
                     // get nearest neighbour solution starting with node not yet used
@@ -97,12 +104,19 @@ public class TabuSearch {
 
                     currentTour = NearestNeighbour.nearestNeighbour(graph, nextNeighbour);
                     nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
+
+                    if (changeNeighbourhood) {
+                        neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
+                        neighbourhood = changeNeighbourhood(neighbourhoodCounter);
+                    }
                 }
                 else if (restartType == TabuRestartType.BACKTRACK && addNextMove == -1) {
                     // backtrack to previous 'promising' solution
                     currentTour = backtrackList.getPermutation();
                     if (currentTour != null ) {
                         tabuList = backtrackList.getTabuList(); // restore solution tabu list
+                        neighbourhoodCounter = backtrackList.getNeighbourhood(); // restore solution neighbourhood
+                        neighbourhood = changeNeighbourhood(neighbourhoodCounter);
                     }
                     else {
                         // get nearest neighbour solution starting with node not yet used
@@ -111,11 +125,12 @@ public class TabuSearch {
 
                         currentTour = NearestNeighbour.nearestNeighbour(graph, nextNeighbour);
                         nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
+
+                        if (changeNeighbourhood) {
+                            neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
+                            neighbourhood = changeNeighbourhood(neighbourhoodCounter);
+                        }
                     }
-                }
-                if (changeNeighbourhood) {
-                    neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
-                    neighbourhood = changeNeighbourhood(neighbourhoodCounter);
                 }
             }
 
@@ -123,13 +138,14 @@ public class TabuSearch {
 
             // if found new best tour save it
             if (currentDistance < bestDistance) {
+                //System.out.println("Best dist " + currentDistance + " < " + bestDistance);
                 bestTour = currentTour;
                 bestDistance = currentDistance;
                 noImprovementCounter = 0;
 
                 // if restart type is backtracking and solution is better than the current one
                 if (addNextMove == -1 && restartType == TabuRestartType.BACKTRACK) {
-                    backtrackList.addPermutation(currentTour);
+                    backtrackList.addPermutation(currentTour, neighbourhoodCounter);
                     addNextMove = 0;
                 }
             }
@@ -148,6 +164,11 @@ public class TabuSearch {
                     tabuList.clearTabuList();
                     if (restartType == TabuRestartType.RANDOM) {
                         currentTour = KRandom.generateRandomCycle(graph);
+
+                        if (changeNeighbourhood) {
+                            neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
+                            neighbourhood = changeNeighbourhood(neighbourhoodCounter);
+                        }
                     }
                     else if (restartType == TabuRestartType.NEIGHBOUR) {
                         // get nearest neighbour solution starting with node not yet used
@@ -156,12 +177,19 @@ public class TabuSearch {
 
                         currentTour = NearestNeighbour.nearestNeighbour(graph, nextNeighbour);
                         nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
+
+                        if (changeNeighbourhood) {
+                            neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
+                            neighbourhood = changeNeighbourhood(neighbourhoodCounter);
+                        }
                     }
                     else if (restartType == TabuRestartType.BACKTRACK && addNextMove == -1) {
                         // backtrack to previous 'promising' solution
                         currentTour = backtrackList.getPermutation();
                         if (currentTour != null ) {
                             tabuList = backtrackList.getTabuList(); // restore solution tabu list
+                            neighbourhoodCounter = backtrackList.getNeighbourhood(); // restore solution neighbourhood
+                            neighbourhood = changeNeighbourhood(neighbourhoodCounter);
                         }
                         else {
                             // get nearest neighbour solution starting with node not yet used
@@ -170,12 +198,12 @@ public class TabuSearch {
 
                             currentTour = NearestNeighbour.nearestNeighbour(graph, nextNeighbour);
                             nextNeighbour = (nextNeighbour + 1) % (graph.getSize() - 1) + 1;
-                        }
-                    }
 
-                    if (changeNeighbourhood) {
-                        neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
-                        neighbourhood = changeNeighbourhood(neighbourhoodCounter);
+                            if (changeNeighbourhood) {
+                                neighbourhoodCounter = (neighbourhoodCounter + 1) % 3 ;
+                                neighbourhood = changeNeighbourhood(neighbourhoodCounter);
+                            }
+                        }
                     }
                 }
             }
@@ -199,7 +227,7 @@ public class TabuSearch {
                 }
                 case ITERATIONS_AMOUNT -> {
                     if (iterationsAmount >= stopCondVal) {
-                        tabuList.printTabuList2();
+                        //tabuList.printTabuList2();
                         return bestTour;
                     }
                 }
@@ -216,7 +244,7 @@ public class TabuSearch {
 
     private static AbstractNeighbourhood changeNeighbourhood(int neighbourhoodCounter) {
         if (neighbourhoodCounter == 0) {
-             return new InsertNeighbourhood();
+            return new InsertNeighbourhood();
         }
         else if (neighbourhoodCounter == 1) {
             return new InvertNeighbourhood();
