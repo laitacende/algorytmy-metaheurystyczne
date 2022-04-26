@@ -84,7 +84,7 @@ public class TabuList {
     private void initializeTabuList() {
         for (int i = 0; i < tabuList.length; i++) {
             for (int j = 0; j < tabuList.length; j++) {
-                tabuList[i][j] = new TabuListElement(false);
+                tabuList[i][j] = new TabuListElement(false, i, j);
             }
         }
     }
@@ -92,8 +92,16 @@ public class TabuList {
     private void initializeTabuList(TabuList list) {
         for (int i = 0; i < this.tabuList.length; i++) {
             for (int j = 0; j < this.tabuList.length; j++) {
-                this.tabuList[i][j] = new TabuListElement(list.tabuList[i][j].value);
+                this.tabuList[i][j] = new TabuListElement(list.tabuList[i][j].value, i , j);
             }
+        }
+        initializeQueue(list);
+    }
+
+    private void initializeQueue(TabuList list) {
+       // Queue<TabuListElement> tmp = new ArrayDeque<>(list.tabuQueue);
+        for (TabuListElement element : list.tabuQueue) {
+            this.tabuQueue.add(tabuList[element.x][element.y]);
         }
     }
 
@@ -122,9 +130,13 @@ public class TabuList {
      */
     private static class TabuListElement {
         Boolean value;
+        int x; // coordinates in array
+        int y;
 
-        TabuListElement(Boolean value) {
+        TabuListElement(Boolean value, int x, int y) {
             this.value = value;
+            this.x = x;
+            this.y = y;
         }
     }
 }
