@@ -8,14 +8,34 @@ import java.io.IOException;
 
 public class Graph {
     public Double[][] adjacencyMatrix;
+    /**
+     * Matrix with inverted distances (used for Ant Colony Optimization)
+     */
+    public Double[][] inverseAdjacencyMatrix;
     public Integer vNo;
     public GraphType type;
     public Coordinates[] coordinates;
+
+    /**
+     * Matrix of pheromones on roads from city i to j used in Ant Colony Optimization
+     */
+    public Double[][] pheromonesMatrix;
+
+    /**
+     * Parameters to calculate probability
+     * TODO find the best values
+     */
+    public double alfa;
+    public double beta;
+
+
 
     public Graph(Integer vNo, GraphType type) {
         // vNo + 1 because nodes are enumerated from 1 to vNo
         this.vNo = vNo + 1;
         adjacencyMatrix = new Double[this.vNo][this.vNo];
+        pheromonesMatrix = new Double[this.vNo][this.vNo];
+        inverseAdjacencyMatrix = new Double[this.vNo][this.vNo];
         this.type = type;
         if (type == GraphType.EUC_2D) {
             coordinates = new Coordinates[this.vNo];
@@ -24,10 +44,15 @@ public class Graph {
 
     public void addEdge(Integer source, Integer destination, Double distance) {
         adjacencyMatrix[source][destination] = distance;
+        inverseAdjacencyMatrix[source][destination] = 1 / Math.pow(distance, beta);
     }
 
     public Double getEdge(Integer source, Integer destination) {
         return adjacencyMatrix[source][destination];
+    }
+
+    public Double getEdgeInverted(Integer source, Integer destination) {
+        return inverseAdjacencyMatrix[source][destination];
     }
 
     public void addDiagonalValues() {
@@ -116,5 +141,21 @@ public class Graph {
            }
         }
         return avg / (vNo * vNo);
+    }
+
+    public void setPheromonesToEdge(double amount, int source, int destination) {
+        pheromonesMatrix[source][destination] = amount;
+    }
+
+    public double getEdgePheromones(int source, int destination) {
+        return pheromonesMatrix[source][destination];
+    }
+
+    public void increasePheromonesOnEdge(double amount, int source, int destination) {
+        pheromonesMatrix[source][destination] += amount;
+    }
+
+    public void evaporatePheromonesOnEdge(double amount, int source, int destination) {
+        pheromonesMatrix[source][destination] *= (1 - amount);
     }
 }
