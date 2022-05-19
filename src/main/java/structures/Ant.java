@@ -10,7 +10,7 @@ public class Ant {
     /**
      * Tour created by the ant
      */
-    List<Integer> trail;
+    public List<Integer> trail;
     boolean[] visited;
     int visitedNumber;
     /**
@@ -18,7 +18,7 @@ public class Ant {
      */
     double pheromones;
 
-    double trailLength;
+    public double trailLength;
 
     public Double[][] probabilityMatrix;
 

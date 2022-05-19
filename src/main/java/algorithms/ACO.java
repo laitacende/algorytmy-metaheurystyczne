@@ -31,4 +31,18 @@ public class ACO extends AbstractACO {
         }
     }
 
+    @Override
+    List<Integer> getBestTour() {
+        double best = Double.MAX_VALUE;
+        List<Integer> bestTour = null;
+        // find ant with best tour length
+        for (Ant ant: ants) {
+            if (ant.trailLength < best) {
+                best = ant.trailLength;
+                bestTour = ant.trail;
+            }
+        }
+        return bestTour;
+    }
+
 }

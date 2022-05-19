@@ -3,6 +3,7 @@ package algorithms;
 import org.apache.commons.math3.random.MersenneTwister;
 import structures.Ant;
 import structures.Graph;
+import utils.CostFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,9 @@ public abstract class AbstractACO {
     public List<Integer> antColonyOptimization(Graph graph, double antsFactor, double rho, StopCondType stopCondType,
                                                       int stopCondVal) {
         List<Integer> bestTour = new ArrayList<>();
+        double bestDistance = Double.MAX_VALUE;
+        double currentDistance = Double.MAX_VALUE;
+        List<Integer> currentTour = new ArrayList<>();
 
         // to handle stop cond
         long startTime = System.currentTimeMillis();
@@ -32,7 +36,13 @@ public abstract class AbstractACO {
             moveAnts(graph);
             evaporatePheromones(graph, rho);
             // TODO add pheromones to trails (different strategies) (reinforcement)
-
+            // get best tour from ants
+            currentTour = getBestTour();
+            currentDistance = CostFunction.calcCostFunction(currentTour, graph);
+            if (bestDistance > currentDistance) {
+                bestTour = currentTour;
+                bestDistance = currentDistance;
+            }
             // termination
             switch (stopCondType) {
                 case TIME_STOP_COND -> {
@@ -71,5 +81,7 @@ public abstract class AbstractACO {
     }
 
     abstract void moveAnts(Graph graph);
+
+    abstract List<Integer> getBestTour();
 
 }

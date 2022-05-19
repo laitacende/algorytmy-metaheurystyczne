@@ -4,6 +4,8 @@ import structures.Ant;
 import structures.Graph;
 import structures.Subcolony;
 
+import java.util.List;
+
 public class ACOParallel extends AbstractACO {
     private Subcolony[] subcolonies;
     private int numberOfSubcolonies = 5;
@@ -50,5 +52,24 @@ public class ACOParallel extends AbstractACO {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    List<Integer> getBestTour() {
+        double best = Double.MAX_VALUE;
+        List<Integer> bestTour = null;
+
+        // find ant with best tour length
+        for (int i = 0; i < numberOfSubcolonies; i++) {
+            for (Ant ant: subcolonies[i].subAnts) {
+                if (ant.trailLength < best) {
+                    best = ant.trailLength;
+                    bestTour = ant.trail;
+                }
+            }
+
+        }
+
+        return bestTour;
     }
 }
