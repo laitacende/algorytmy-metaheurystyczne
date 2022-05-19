@@ -43,7 +43,7 @@ public class Ant {
         visitedNumber++;
         // update trail length
         if (trail.size() > 1) { // not first city
-            trailLength += graph.getEdge(trail.size() - 2, city);
+            trailLength += graph.getEdge(trail.get(trail.size() - 2), city);
         }
     }
 
@@ -92,5 +92,4 @@ public class Ant {
             }
         }
     }
-
 }
