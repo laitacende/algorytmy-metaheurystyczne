@@ -3,6 +3,7 @@ package algorithms;
 import structures.Ant;
 import structures.Graph;
 import structures.Subcolony;
+import utils.IReinforcement;
 
 import java.util.List;
 
@@ -20,10 +21,10 @@ public class ACOParallel extends AbstractACO {
             // create subcolonies
             subcolonies = new Subcolony[numberOfSubcolonies];
         }
-        int size = (graph.vNo - 1) / numberOfSubcolonies;
+        int size = (int) ((graph.vNo - 1) * antsFactor) / numberOfSubcolonies;
         // add equal number of ants to subcolonies
         for (int i = 0; i < numberOfSubcolonies; i++) {
-            subcolonies[i] = new Subcolony(graph, size);
+            subcolonies[i] = new Subcolony(graph);
             for (int j = 0; j < size; j++) {
                 subcolonies[i].addAntToSubcolony(new Ant(1.0, graph.vNo));
             }
@@ -38,7 +39,11 @@ public class ACOParallel extends AbstractACO {
     }
 
     @Override
-    void moveAnts(Graph graph) {
+    void moveAnts(Graph graph, IReinforcement reinforcement) {
+        // set reinforcement strategy
+        for (Subcolony subcolony : subcolonies) {
+            subcolony.reinforcement = reinforcement;
+        }
         // start threads
         for (Subcolony subcolony : subcolonies) {
             subcolony.start();

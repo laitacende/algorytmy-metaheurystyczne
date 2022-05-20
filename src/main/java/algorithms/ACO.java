@@ -2,6 +2,8 @@ package algorithms;
 
 import structures.Ant;
 import structures.Graph;
+import utils.IReinforcement;
+import utils.OnlineDelayedReinforcement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +15,8 @@ public class ACO extends AbstractACO {
     public void initializeAnts(Graph graph, double antsFactor) {
         // create ants
         if (ants == null)
-            ants = new Ant[(int) (graph.vNo * antsFactor)];
+            ants = new Ant[(int) ((graph.vNo - 1) * antsFactor)];
+            //ants = new Ant[1];
         // give each ant a random starting point
         for (int i = 0; i < ants.length; i++) {
             ants[i] = new Ant(1.0, graph.vNo); // TODO find out amount of pheromones
@@ -23,10 +26,15 @@ public class ACO extends AbstractACO {
     }
 
     @Override
-    public void moveAnts(Graph graph) {
+    public void moveAnts(Graph graph, IReinforcement reinforcement) {
         for (int i = 0; i < graph.vNo; i++) {
             for (Ant ant : ants) {
                 ant.goToNextCity(graph);
+
+                // update pheromones after each ant completes tour
+                if (reinforcement instanceof OnlineDelayedReinforcement) {
+                    reinforcement.updatePheromones(ant, graph);
+                }
             }
         }
     }

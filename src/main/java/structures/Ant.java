@@ -32,6 +32,7 @@ public class Ant {
         trail = new ArrayList<>();
         pheromones = pheromonesAmount;
         visited = new boolean[vNo];
+        Arrays.fill(visited, false);
         probabilityMatrix = new Double[vNo][vNo];
         trailLength = 0;
         visitedNumber = 0;
@@ -45,6 +46,10 @@ public class Ant {
         if (trail.size() > 1) { // not first city
             trailLength += graph.getEdge(trail.get(trail.size() - 2), city);
         }
+        if (trail.size() == graph.vNo - 1) { // last city
+            trailLength += graph.getEdge(trail.get(trail.size() - 1), trail.get(0));
+        }
+        System.out.println(trail);
     }
 
     public void resetAnt() {
@@ -61,13 +66,14 @@ public class Ant {
         double sum = 0;
         int current = trail.get(trail.size() - 1);
         for (int j = 1; j < graph.vNo; j++) {
-            if (sum >= rand) {
+            if (!visited[j]) {
+                sum += probabilityMatrix[current][j];
+            }
+
+            if (sum >= rand && !visited[j]) {
                 // go to this city
                 addCityToTrail(j, graph);
                 return;
-            }
-            if (!visited[j]) {
-                sum += probabilityMatrix[current][j];
             }
         }
     }
