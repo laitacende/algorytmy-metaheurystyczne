@@ -5,6 +5,8 @@ import utils.GraphType;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class Graph {
     public Double[][] adjacencyMatrix;
@@ -15,6 +17,8 @@ public class Graph {
     public Integer vNo;
     public GraphType type;
     public Coordinates[] coordinates;
+
+    Lock lock = new ReentrantLock();
 
     /**
      * Matrix of pheromones on roads from city i to j used in Ant Colony Optimization
@@ -144,15 +148,30 @@ public class Graph {
     }
 
     public void setPheromonesToEdge(double amount, int source, int destination) {
-        pheromonesMatrix[source][destination] = amount;
+        try {
+            lock.lock();
+            pheromonesMatrix[source][destination] = amount;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public double getEdgePheromones(int source, int destination) {
-        return pheromonesMatrix[source][destination];
+        try {
+            lock.lock();
+            return pheromonesMatrix[source][destination];
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void increasePheromonesOnEdge(double amount, int source, int destination) {
-        pheromonesMatrix[source][destination] += amount;
+        try {
+            lock.lock();
+            pheromonesMatrix[source][destination] += amount;
+        } finally {
+            lock.unlock();
+        }
     }
 
     public void evaporatePheromonesOnEdge(double amount, int source, int destination) {
