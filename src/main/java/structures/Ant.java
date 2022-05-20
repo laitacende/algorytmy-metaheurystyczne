@@ -49,7 +49,6 @@ public class Ant {
         if (trail.size() == graph.vNo - 1) { // last city
             trailLength += graph.getEdge(trail.get(trail.size() - 1), trail.get(0));
         }
-        System.out.println(trail);
     }
 
     public void resetAnt() {
@@ -73,7 +72,7 @@ public class Ant {
             if (sum >= rand && !visited[j]) {
                 // go to this city
                 addCityToTrail(j, graph);
-                return;
+                break;
             }
         }
     }
@@ -97,5 +96,13 @@ public class Ant {
                 probabilityMatrix[i][j] = 0.0;
             }
         }
+
+//        for (int k = 1; k < probabilityMatrix.length; k++) {
+//            for (int j = 1; j < probabilityMatrix.length; j++) {
+//
+//                System.out.printf("%6s", String.format("%.2f", probabilityMatrix[k][j]));
+//            }
+//            System.out.println();
+//        }
     }
 }

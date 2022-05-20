@@ -29,8 +29,8 @@ public class Graph {
      * Parameters to calculate probability
      * TODO find the best values
      */
-    public double alfa;
-    public double beta;
+    public double alfa = 1.0;
+    public double beta = 1.0;
 
 
 
@@ -48,7 +48,12 @@ public class Graph {
 
     public void addEdge(Integer source, Integer destination, Double distance) {
         adjacencyMatrix[source][destination] = distance;
-        inverseAdjacencyMatrix[source][destination] = 1 / Math.pow(distance, beta);
+        double pow = Math.pow(distance, beta);
+        if (pow != 0) {
+            inverseAdjacencyMatrix[source][destination] = 1.0 / Math.pow(distance, beta);
+        } else {
+            inverseAdjacencyMatrix[source][destination] = 1.0;
+        }
     }
 
     public Double getEdge(Integer source, Integer destination) {
@@ -74,6 +79,16 @@ public class Graph {
             for (int j = 1; j < adjacencyMatrix.length; j++) {
 
                System.out.printf("%6s", String.format("%.2f", adjacencyMatrix[i][j]));
+            }
+            System.out.println();
+        }
+    }
+
+    public void printInverseAdjacencyMatrix() {
+        for (int i = 1; i < adjacencyMatrix.length; i++) {
+            for (int j = 1; j < adjacencyMatrix.length; j++) {
+
+                System.out.printf("%6s", String.format("%.2f", inverseAdjacencyMatrix[i][j]));
             }
             System.out.println();
         }

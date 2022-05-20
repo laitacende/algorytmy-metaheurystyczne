@@ -25,13 +25,17 @@ public class Subcolony extends Thread {
     }
 
     private void moveAnts() {
-        for (int i = 0; i < graph.vNo; i++) {
+        if (reinforcement instanceof OnlineDelayedReinforcement) {
             for (Ant ant : subAnts) {
-                ant.goToNextCity(graph);
-
-                // update pheromones after each ant completes tour
-                if (reinforcement instanceof OnlineDelayedReinforcement) {
-                    reinforcement.updatePheromones(ant, graph);
+                for (int i = 0; i < graph.vNo; i++) {
+                    ant.goToNextCity(graph);
+                }
+                reinforcement.updatePheromones(ant, graph);
+            }
+        } else {
+            for (int i = 0; i < graph.vNo; i++) {
+                for (Ant ant : subAnts) {
+                    ant.goToNextCity(graph);
                 }
             }
         }
