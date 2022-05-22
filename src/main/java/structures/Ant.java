@@ -49,6 +49,7 @@ public class Ant {
         if (trail.size() == graph.vNo - 1) { // last city
             trailLength += graph.getEdge(trail.get(trail.size() - 1), trail.get(0));
         }
+        //System.out.println(trail);
     }
 
     public void resetAnt() {

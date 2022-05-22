@@ -4,6 +4,7 @@ import structures.Ant;
 import structures.Graph;
 import utils.IReinforcement;
 import utils.OnlineDelayedReinforcement;
+import utils.OnlineStepByStepReinforcement;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,20 +28,31 @@ public class ACO extends AbstractACO {
 
     @Override
     public void moveAnts(Graph graph, IReinforcement reinforcement) {
-        if (reinforcement instanceof OnlineDelayedReinforcement) {
-            for (Ant ant : ants) {
-                for (int i = 0; i < graph.vNo; i++) {
-                    ant.goToNextCity(graph);
+        for (Ant ant : ants) {
+            for (int i = 0; i < graph.vNo; i++) {
+                ant.goToNextCity(graph);
+                if (reinforcement instanceof OnlineStepByStepReinforcement) {
+                    reinforcement.updatePheromones(ant, graph);
                 }
+            }
+            if (reinforcement instanceof OnlineDelayedReinforcement) {
                 reinforcement.updatePheromones(ant, graph);
             }
-        } else {
-            for (int i = 0; i < graph.vNo; i++) {
-                for (Ant ant : ants) {
-                    ant.goToNextCity(graph);
-                }
-            }
         }
+//        if (reinforcement instanceof OnlineDelayedReinforcement) {
+//            for (Ant ant : ants) {
+//                for (int i = 0; i < graph.vNo; i++) {
+//                    ant.goToNextCity(graph);
+//                }
+//                reinforcement.updatePheromones(ant, graph);
+//            }
+//        } else {
+//            for (int i = 0; i < graph.vNo; i++) {
+//                for (Ant ant : ants) {
+//                    ant.goToNextCity(graph);
+//                }
+//            }
+//        }
     }
 
     @Override
