@@ -1,4 +1,4 @@
-package structures;
+package structures.tabu;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

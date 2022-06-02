@@ -1,8 +1,9 @@
+import algorithms.KRandom;
 import org.junit.Test;
 import algorithms.TwoOPT;
-import structures.Graph;
-import utils.CostFunction;
-import utils.GraphCreator;
+import structures.tsp.Graph;
+import utils.graph.CostFunction;
+import utils.graph.GraphCreator;
 import java.util.List;
 
 public class TwoOPTTest {
@@ -11,7 +12,7 @@ public class TwoOPTTest {
         Graph g = GraphCreator.randomFullMatrix(5, 10);
         g.printAdjacencyMatrix();
 
-        List<Integer> tour = TwoOPT.twoOpt(g);
+        List<Integer> tour = TwoOPT.twoOpt(g, KRandom.generateRandomCycle(g));
 
         tour.forEach(System.out::println);
         System.out.println(CostFunction.calcCostFunction(tour, g));

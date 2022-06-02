@@ -1,30 +1,32 @@
 package algorithms;
 
+import consts.PheromoneUpdateType;
+import consts.StopCondType;
 import org.apache.commons.math3.random.MersenneTwister;
-import structures.Ant;
-import structures.Graph;
-import utils.CostFunction;
-import utils.IReinforcement;
-
+import structures.aco.Ant;
+import structures.tsp.Graph;
+import utils.graph.CostFunction;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractACO {
-    public Ant[] ants;
+    public ArrayList<Ant> ants;
     public MersenneTwister mt = new MersenneTwister();
 
     /**
-     * @param graph
+     * @param graph problem we are trying to solve
      * @param antsFactor linear dependency with number of cities
      * @param rho pheromones evaporation factor
-     * @return
+     * @return best distance found
+     *
      */
     public List<Integer> antColonyOptimization(Graph graph, double antsFactor, double rho, StopCondType stopCondType,
-                                               int stopCondVal, IReinforcement reinforcement) {
+                                               int stopCondVal, PheromoneUpdateType updateType) {
+
         List<Integer> bestTour = new ArrayList<>();
         double bestDistance = Double.MAX_VALUE;
-        double currentDistance = Double.MAX_VALUE;
-        List<Integer> currentTour = new ArrayList<>();
+        List<Integer> currentTour;
+        double currentDistance;
 
         // to handle stop cond
         long startTime = System.currentTimeMillis();
@@ -34,9 +36,9 @@ public abstract class AbstractACO {
 
         while (true) {
             initializeAnts(graph, antsFactor);
-            moveAnts(graph, reinforcement);
+            moveAnts(graph, updateType);
             evaporatePheromones(graph, rho);
-            // TODO add pheromones to trails (different strategies) (reinforcement)
+
             // get best tour from ants
             currentTour = getBestTour();
             currentDistance = CostFunction.calcCostFunction(currentTour, graph);
@@ -44,6 +46,7 @@ public abstract class AbstractACO {
                 bestTour = currentTour;
                 bestDistance = currentDistance;
             }
+
             // termination
             switch (stopCondType) {
                 case TIME_STOP_COND -> {
@@ -57,12 +60,9 @@ public abstract class AbstractACO {
                     }
                 }
             }
-
             iterationsAmount++;
         }
     }
-
-    public abstract void initializeAnts(Graph graph, double antsFactor);
 
     public void evaporatePheromones(Graph graph, double rho) {
         // evaporate for each trail
@@ -81,8 +81,9 @@ public abstract class AbstractACO {
         }
     }
 
-    abstract void moveAnts(Graph graph, IReinforcement reinforcement);
+    public abstract void initializeAnts(Graph graph, double antsFactor);
+
+    abstract void moveAnts(Graph graph, PheromoneUpdateType updateType);
 
     abstract List<Integer> getBestTour();
-
 }

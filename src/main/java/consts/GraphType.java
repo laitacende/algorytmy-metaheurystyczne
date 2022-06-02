@@ -1,4 +1,4 @@
-package utils;
+package consts;
 
 // enum to determine the tape of graph
 public enum GraphType {

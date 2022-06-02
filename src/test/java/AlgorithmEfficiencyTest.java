@@ -3,9 +3,9 @@ import algorithms.ExtendedNearestNeighbour;
 import algorithms.KRandom;
 import algorithms.NearestNeighbour;
 import algorithms.TwoOPT;
-import structures.Graph;
-import utils.CostFunction;
-import utils.GraphCreator;
+import structures.tsp.Graph;
+import utils.graph.CostFunction;
+import utils.graph.GraphCreator;
 import java.util.List;
 
 public class AlgorithmEfficiencyTest {
@@ -15,7 +15,7 @@ public class AlgorithmEfficiencyTest {
 
         g.printAdjacencyMatrix();
         List<Integer> tour = NearestNeighbour.nearestNeighbour(g, 1);
-        List<Integer> tour2 = TwoOPT.twoOpt(g);
+        List<Integer> tour2 = TwoOPT.twoOpt(g, KRandom.generateRandomCycle(g));
         List<Integer> tour3 = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
         List<Integer> tour4 = KRandom.kRandom(100, g);
 

@@ -1,7 +1,6 @@
-import org.junit.Assert;
 import org.junit.Test;
-import structures.Graph;
-import utils.GraphCreator;
+import structures.tsp.Graph;
+import utils.graph.GraphCreator;
 
 import java.io.IOException;
 

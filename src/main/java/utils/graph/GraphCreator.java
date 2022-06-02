@@ -1,12 +1,12 @@
-package utils;
+package utils.graph;
 
+import consts.GraphType;
 import org.apache.commons.math3.random.MersenneTwister;
-import structures.Coordinates;
-import structures.Graph;
+import structures.tsp.Coordinates;
+import structures.tsp.Graph;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Objects;
 
 

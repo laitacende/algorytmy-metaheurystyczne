@@ -1,15 +1,13 @@
-import algorithms.ExtendedNearestNeighbour;
-import algorithms.KRandom;
-import algorithms.NearestNeighbour;
-import algorithms.TwoOPT;
-import structures.Graph;
-import utils.CostFunction;
-import utils.GraphCreator;
-import utils.GraphType;
+import algorithms.*;
+import consts.PheromoneUpdateType;
+import consts.StopCondType;
+import structures.tsp.Graph;
+import utils.graph.CostFunction;
+import utils.graph.GraphCreator;
+import consts.GraphType;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 
 public class Main {
@@ -135,233 +133,253 @@ public class Main {
 //        String prefix = "../tsp";
 //        File dir = new File(prefix);
 //        String[] fileList = dir.list();
-        String withoutPrefix = fileIn.substring(8, fileIn.length() - 5);
-        withoutPrefix = withoutPrefix.substring(8);
-        System.out.println("name: " + withoutPrefix);
-        File file = new File("results_atsp.txt");
-        FileWriter fileWriter =  null;
-        HashMap<String, Integer> solutions;
-        int K_OPTIMAL_MULTIPLIER = 350;
-        try {
-            fileWriter = new FileWriter(file, true); // append to file
-            solutions = CostFunction.getSolutionsFromFile("../solutions/solutions_atsp.txt");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-        Graph g = null;
-        List<Integer> tour;
-      //  if (fileList != null) {
-           // for(String fileName : fileList) {
-                try {
-                   // g = GraphCreator.fromFile(prefix + "/" + fileName);
-                    g = GraphCreator.fromFile(fileIn);
-                    //System.out.println(fileName);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    //continue;
-                }
-                if (g != null) {
-                    // test algorithms
-                    double costKRand = 0;
-                    double costNeighbour = 0;
-                    double costExtended = 0;
-                    double costOPT = 0;
-
-                    long timeKRand = 0;
-                    long timeNeighbour = 0;
-                    long timeExtended = 0;
-                    long timeOPT = 0;
-
-                    long startTime = System.currentTimeMillis();
-                    System.out.println("KRandom");
-                    tour = KRandom.kRandom(g.vNo * K_OPTIMAL_MULTIPLIER, g);
-                    costKRand = CostFunction.calcCostFunction(tour, g);
-                    timeKRand = System.currentTimeMillis() - startTime;
-
-                    System.out.println("Nearesteighbour");
-                    startTime = System.currentTimeMillis();
-                    tour = NearestNeighbour.nearestNeighbour(g, 1);
-                    costNeighbour = CostFunction.calcCostFunction(tour, g);
-                    timeNeighbour = System.currentTimeMillis() - startTime;
-
-                    System.out.println("ExtendedNearesteighbour");
-                    startTime = System.currentTimeMillis();
-                    tour = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
-                    costExtended = CostFunction.calcCostFunction(tour, g);
-                    timeExtended = System.currentTimeMillis() - startTime;
-
-                    System.out.println("TwoOPT");
-                    startTime = System.currentTimeMillis();
-                    tour = TwoOPT.twoOpt(g);
-                    costOPT = CostFunction.calcCostFunction(tour, g);
-                    timeOPT = System.currentTimeMillis() - startTime;
-
-                    // fileName numberOfNodes costKRandom timeKRandom
-                    // costNeighbour timeNeighbour costExtendedNeighbour
-                    // timeExtendedNeighbour costOPT timeOPT
-                    // averageDistance optimalSolution
-                    try {
-                        fileWriter.write(withoutPrefix + " " + g.vNo + " " +
-                                costKRand + " " + timeKRand + " " +
-                                costNeighbour + " " + timeNeighbour + " " +
-                                costExtended + " " + timeExtended + " " +
-                                costOPT + " " + timeOPT + " " +
-                                g.findAverageDistance() + " " + solutions.get(withoutPrefix) + "\n");
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-           // }
-      //  }
-        try {
-            fileWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+//        String withoutPrefix = fileIn.substring(8, fileIn.length() - 5);
+//        withoutPrefix = withoutPrefix.substring(8);
+//        System.out.println("name: " + withoutPrefix);
+//        File file = new File("results_atsp.txt");
+//        FileWriter fileWriter =  null;
+//        HashMap<String, Integer> solutions;
+//        int K_OPTIMAL_MULTIPLIER = 350;
+//        try {
+//            fileWriter = new FileWriter(file, true); // append to file
+//            solutions = CostFunction.getSolutionsFromFile("../solutions/solutions_atsp.txt");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return;
+//        }
+//        Graph g = null;
+//        List<Integer> tour;
+//      //  if (fileList != null) {
+//           // for(String fileName : fileList) {
+//                try {
+//                   // g = GraphCreator.fromFile(prefix + "/" + fileName);
+//                    g = GraphCreator.fromFile(fileIn);
+//                    //System.out.println(fileName);
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                    //continue;
+//                }
+//                if (g != null) {
+//                    // test algorithms
+//                    double costKRand = 0;
+//                    double costNeighbour = 0;
+//                    double costExtended = 0;
+//                    double costOPT = 0;
+//
+//                    long timeKRand = 0;
+//                    long timeNeighbour = 0;
+//                    long timeExtended = 0;
+//                    long timeOPT = 0;
+//
+//                    long startTime = System.currentTimeMillis();
+//                    System.out.println("KRandom");
+//                    tour = KRandom.kRandom(g.vNo * K_OPTIMAL_MULTIPLIER, g);
+//                    costKRand = CostFunction.calcCostFunction(tour, g);
+//                    timeKRand = System.currentTimeMillis() - startTime;
+//
+//                    System.out.println("Nearesteighbour");
+//                    startTime = System.currentTimeMillis();
+//                    tour = NearestNeighbour.nearestNeighbour(g, 1);
+//                    costNeighbour = CostFunction.calcCostFunction(tour, g);
+//                    timeNeighbour = System.currentTimeMillis() - startTime;
+//
+//                    System.out.println("ExtendedNearesteighbour");
+//                    startTime = System.currentTimeMillis();
+//                    tour = ExtendedNearestNeighbour.extendedNearestNeighbour(g);
+//                    costExtended = CostFunction.calcCostFunction(tour, g);
+//                    timeExtended = System.currentTimeMillis() - startTime;
+//
+//                    System.out.println("TwoOPT");
+//                    startTime = System.currentTimeMillis();
+//                    tour = TwoOPT.twoOpt(g);
+//                    costOPT = CostFunction.calcCostFunction(tour, g);
+//                    timeOPT = System.currentTimeMillis() - startTime;
+//
+//                    // fileName numberOfNodes costKRandom timeKRandom
+//                    // costNeighbour timeNeighbour costExtendedNeighbour
+//                    // timeExtendedNeighbour costOPT timeOPT
+//                    // averageDistance optimalSolution
+//                    try {
+//                        fileWriter.write(withoutPrefix + " " + g.vNo + " " +
+//                                costKRand + " " + timeKRand + " " +
+//                                costNeighbour + " " + timeNeighbour + " " +
+//                                costExtended + " " + timeExtended + " " +
+//                                costOPT + " " + timeOPT + " " +
+//                                g.findAverageDistance() + " " + solutions.get(withoutPrefix) + "\n");
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//           // }
+//      //  }
+//        try {
+//            fileWriter.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
     }
 
     public static void testForRandom(String fileName, GraphType type, int bound, int start, int end, int increment) {
-        File file = new File(fileName);
-        FileWriter fileWriter = null;
-        try {
-            fileWriter = new FileWriter(file);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
+//        File file = new File(fileName);
+//        FileWriter fileWriter = null;
+//        try {
+//            fileWriter = new FileWriter(file);
+//        }
+//        catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//        int K_OPTIMAL_MULTIPLIER = 350;
+//
+//        Graph graph = null;
+//        List<Integer> solution;
+//        double costKRand;
+//        double costNearestNeighbour;
+//        double costExtendedNN;
+//        double costOPT;
+//        double costCurrentBest = 0.0;
+//        double avgBestCost = 0.0;
+//        double avgDistance = 0.0;
+//
+//        double avgCostKRand = 0.0;
+//        double avgCostNearestNeighbour = 0.0;
+//        double avgCostExtendedNN = 0.0;
+//        double avgCostOPT = 0.0;
+//
+//        double avgDeviationKRand = 0.0;
+//        double avgDeviationNearestNeighbour = 0.0;
+//        double avgDeviationExtendedNN = 0.0;
+//        double avgDeviationOPT = 0.0;
+//
+//        long startTime;
+//        long avgTimeKRand = 0;
+//        long avgTimeNearestNeighbour = 0;
+//        long avgTimeExtendedNN = 0;
+//        long avgTimeOPT = 0;
+//
+//        int configTestsNo = 5;
+//        int vNo = start;
+//        while (vNo < end) {
+//            for (int i = 0; i < configTestsNo; i++) {
+//                switch (type) {
+//                    case EUC_2D -> graph = GraphCreator.randomEuclidean(vNo, bound);
+//                    case UPPER_ROW -> graph = GraphCreator.randomSymmetric(vNo, bound);
+//                    case FULL_MATRIX -> graph = GraphCreator.randomFullMatrix(vNo, bound);
+//                }
+//                assert graph != null;
+//                startTime = System.currentTimeMillis();
+//                solution = KRandom.kRandom((K_OPTIMAL_MULTIPLIER * vNo), graph);
+//                avgTimeKRand += System.currentTimeMillis() - startTime; // time in milliseconds
+//                costKRand = CostFunction.calcCostFunction(solution, graph);
+//                avgCostKRand += costKRand;
+//                costCurrentBest = costKRand;
+//
+//                startTime = System.currentTimeMillis();
+//                solution = NearestNeighbour.nearestNeighbour(graph, 1);
+//                avgTimeNearestNeighbour += System.currentTimeMillis() - startTime; // time in milliseconds
+//                costNearestNeighbour = CostFunction.calcCostFunction(solution, graph);
+//                avgCostNearestNeighbour += costNearestNeighbour;
+//                if (costNearestNeighbour < costCurrentBest) { costCurrentBest = costNearestNeighbour; }
+//
+//                startTime = System.currentTimeMillis();
+//                solution = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
+//                avgTimeExtendedNN += System.currentTimeMillis() - startTime; // time in milliseconds
+//                costExtendedNN = CostFunction.calcCostFunction(solution, graph);
+//                avgCostExtendedNN += costExtendedNN;
+//                if (costExtendedNN < costCurrentBest) { costCurrentBest = costExtendedNN; }
+//
+//                startTime = System.currentTimeMillis();
+//                solution = TwoOPT.twoOpt(graph);
+//                avgTimeOPT = System.currentTimeMillis() - startTime; // time in milliseconds
+//                costOPT = CostFunction.calcCostFunction(solution, graph);
+//                avgCostOPT += costOPT;
+//                if (costOPT < costCurrentBest) { costCurrentBest = costOPT; }
+//
+//                avgDeviationKRand += (costKRand - costCurrentBest) / costCurrentBest;
+//                avgDeviationNearestNeighbour += (costNearestNeighbour - costCurrentBest) / costCurrentBest;
+//                avgDeviationExtendedNN += (costExtendedNN - costCurrentBest) / costCurrentBest;
+//                avgDeviationOPT += (costOPT - costCurrentBest) / costCurrentBest;
+//                avgBestCost += costCurrentBest;
+//                avgDistance += graph.findAverageDistance();
+//            }
+//            avgCostKRand /= configTestsNo;
+//            avgCostNearestNeighbour /= configTestsNo;
+//            avgCostExtendedNN /= configTestsNo;
+//            avgCostOPT /= configTestsNo;
+//
+//            avgTimeKRand /= configTestsNo;
+//            avgTimeNearestNeighbour /= configTestsNo;
+//            avgTimeExtendedNN /= configTestsNo;
+//            avgTimeOPT /= configTestsNo;
+//
+//            avgDeviationKRand /= configTestsNo;
+//            avgDeviationNearestNeighbour /= configTestsNo;
+//            avgDeviationExtendedNN /= configTestsNo;
+//            avgDeviationOPT /= configTestsNo;
+//            avgBestCost /= configTestsNo;
+//            avgDistance /= configTestsNo;
+//
+//            try {
+//                assert fileWriter != null;
+//                fileWriter.write(vNo + " " +
+//                        avgCostKRand + " " + avgTimeKRand + " " + avgDeviationKRand + " " +
+//                        avgCostNearestNeighbour + " " + avgTimeNearestNeighbour + " " + avgDeviationNearestNeighbour + " " +
+//                        avgCostExtendedNN + " " + avgTimeExtendedNN + " " + avgDeviationExtendedNN + " " +
+//                        avgCostOPT + " " + avgTimeOPT + " " + avgDeviationOPT + " " +
+//                        avgBestCost + " " + avgDistance + "\n");
+//            }
+//            catch (IOException e) {
+//                e.printStackTrace();
+//                System.out.println("file writer in in tests for random error");
+//            }
+//            avgCostKRand = 0.0;
+//            avgCostNearestNeighbour = 0.0;
+//            avgCostExtendedNN = 0.0;
+//            avgCostOPT = 0.0;
+//
+//            avgTimeKRand = 0;
+//            avgTimeNearestNeighbour = 0;
+//            avgTimeExtendedNN = 0;
+//            avgTimeOPT = 0;
+//
+//            avgDeviationKRand = 0.0;
+//            avgDeviationNearestNeighbour = 0.0;
+//            avgDeviationExtendedNN = 0.0;
+//            avgDeviationOPT = 0.0;
+//            avgBestCost = 0.0;
+//            avgDistance = 0.0;
+//
+//            vNo += increment;
+//        }
+//
+//        try {
+//            assert fileWriter != null;
+//            fileWriter.close();
+//        }
+//        catch (IOException e) {
+//            e.printStackTrace();
+//            System.out.println("closing file writer error");
+//        }
+    }
 
-        int K_OPTIMAL_MULTIPLIER = 350;
+    public static void testACO() {
+        Graph graph = GraphCreator.randomEuclidean(50, 10000);
+        ACO aco = new ACO();
+        ACOParallel acoPll = new ACOParallel(5);
+//        List<Integer> solutionACO = aco.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 1000, PheromoneUpdateType.DELAYED);
+//        List<Integer> solutionACOel = aco.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 1000, PheromoneUpdateType.BY_RANK);
+        List<Integer> solutionACOPll = acoPll.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 500, PheromoneUpdateType.BY_RANK);
+        List<Integer> solutionTabu = TabuSearch.tabuSearchENN(graph, StopCondType.ITERATIONS_AMOUNT);
+        List<Integer> solutionOPT = TwoOPT.twoOpt(graph, KRandom.generateRandomCycle(graph));
+        List<Integer> solutionOPT_EXT = TwoOPT.twoOptExtended(graph);
 
-        Graph graph = null;
-        List<Integer> solution;
-        double costKRand;
-        double costNearestNeighbour;
-        double costExtendedNN;
-        double costOPT;
-        double costCurrentBest = 0.0;
-        double avgBestCost = 0.0;
-        double avgDistance = 0.0;
 
-        double avgCostKRand = 0.0;
-        double avgCostNearestNeighbour = 0.0;
-        double avgCostExtendedNN = 0.0;
-        double avgCostOPT = 0.0;
-
-        double avgDeviationKRand = 0.0;
-        double avgDeviationNearestNeighbour = 0.0;
-        double avgDeviationExtendedNN = 0.0;
-        double avgDeviationOPT = 0.0;
-
-        long startTime;
-        long avgTimeKRand = 0;
-        long avgTimeNearestNeighbour = 0;
-        long avgTimeExtendedNN = 0;
-        long avgTimeOPT = 0;
-
-        int configTestsNo = 5;
-        int vNo = start;
-        while (vNo < end) {
-            for (int i = 0; i < configTestsNo; i++) {
-                switch (type) {
-                    case EUC_2D -> graph = GraphCreator.randomEuclidean(vNo, bound);
-                    case UPPER_ROW -> graph = GraphCreator.randomSymmetric(vNo, bound);
-                    case FULL_MATRIX -> graph = GraphCreator.randomFullMatrix(vNo, bound);
-                }
-                assert graph != null;
-                startTime = System.currentTimeMillis();
-                solution = KRandom.kRandom((K_OPTIMAL_MULTIPLIER * vNo), graph);
-                avgTimeKRand += System.currentTimeMillis() - startTime; // time in milliseconds
-                costKRand = CostFunction.calcCostFunction(solution, graph);
-                avgCostKRand += costKRand;
-                costCurrentBest = costKRand;
-
-                startTime = System.currentTimeMillis();
-                solution = NearestNeighbour.nearestNeighbour(graph, 1);
-                avgTimeNearestNeighbour += System.currentTimeMillis() - startTime; // time in milliseconds
-                costNearestNeighbour = CostFunction.calcCostFunction(solution, graph);
-                avgCostNearestNeighbour += costNearestNeighbour;
-                if (costNearestNeighbour < costCurrentBest) { costCurrentBest = costNearestNeighbour; }
-
-                startTime = System.currentTimeMillis();
-                solution = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
-                avgTimeExtendedNN += System.currentTimeMillis() - startTime; // time in milliseconds
-                costExtendedNN = CostFunction.calcCostFunction(solution, graph);
-                avgCostExtendedNN += costExtendedNN;
-                if (costExtendedNN < costCurrentBest) { costCurrentBest = costExtendedNN; }
-
-                startTime = System.currentTimeMillis();
-                solution = TwoOPT.twoOpt(graph);
-                avgTimeOPT = System.currentTimeMillis() - startTime; // time in milliseconds
-                costOPT = CostFunction.calcCostFunction(solution, graph);
-                avgCostOPT += costOPT;
-                if (costOPT < costCurrentBest) { costCurrentBest = costOPT; }
-
-                avgDeviationKRand += (costKRand - costCurrentBest) / costCurrentBest;
-                avgDeviationNearestNeighbour += (costNearestNeighbour - costCurrentBest) / costCurrentBest;
-                avgDeviationExtendedNN += (costExtendedNN - costCurrentBest) / costCurrentBest;
-                avgDeviationOPT += (costOPT - costCurrentBest) / costCurrentBest;
-                avgBestCost += costCurrentBest;
-                avgDistance += graph.findAverageDistance();
-            }
-            avgCostKRand /= configTestsNo;
-            avgCostNearestNeighbour /= configTestsNo;
-            avgCostExtendedNN /= configTestsNo;
-            avgCostOPT /= configTestsNo;
-
-            avgTimeKRand /= configTestsNo;
-            avgTimeNearestNeighbour /= configTestsNo;
-            avgTimeExtendedNN /= configTestsNo;
-            avgTimeOPT /= configTestsNo;
-
-            avgDeviationKRand /= configTestsNo;
-            avgDeviationNearestNeighbour /= configTestsNo;
-            avgDeviationExtendedNN /= configTestsNo;
-            avgDeviationOPT /= configTestsNo;
-            avgBestCost /= configTestsNo;
-            avgDistance /= configTestsNo;
-
-            try {
-                assert fileWriter != null;
-                fileWriter.write(vNo + " " +
-                        avgCostKRand + " " + avgTimeKRand + " " + avgDeviationKRand + " " +
-                        avgCostNearestNeighbour + " " + avgTimeNearestNeighbour + " " + avgDeviationNearestNeighbour + " " +
-                        avgCostExtendedNN + " " + avgTimeExtendedNN + " " + avgDeviationExtendedNN + " " +
-                        avgCostOPT + " " + avgTimeOPT + " " + avgDeviationOPT + " " +
-                        avgBestCost + " " + avgDistance + "\n");
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-                System.out.println("file writer in in tests for random error");
-            }
-            avgCostKRand = 0.0;
-            avgCostNearestNeighbour = 0.0;
-            avgCostExtendedNN = 0.0;
-            avgCostOPT = 0.0;
-
-            avgTimeKRand = 0;
-            avgTimeNearestNeighbour = 0;
-            avgTimeExtendedNN = 0;
-            avgTimeOPT = 0;
-
-            avgDeviationKRand = 0.0;
-            avgDeviationNearestNeighbour = 0.0;
-            avgDeviationExtendedNN = 0.0;
-            avgDeviationOPT = 0.0;
-            avgBestCost = 0.0;
-            avgDistance = 0.0;
-
-            vNo += increment;
-        }
-
-        try {
-            assert fileWriter != null;
-            fileWriter.close();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("closing file writer error");
-        }
+//        System.out.println(CostFunction.calcCostFunction(solutionACO, graph));
+//        System.out.println(CostFunction.calcCostFunction(solutionACOel, graph));
+        System.out.println(CostFunction.calcCostFunction(solutionACOPll, graph));
+        System.out.println(CostFunction.calcCostFunction(solutionOPT, graph));
+        System.out.println(CostFunction.calcCostFunction(solutionTabu, graph));
+        System.out.println(CostFunction.calcCostFunction(solutionOPT_EXT, graph));
     }
 
     public static void main(String[] args) {
@@ -412,6 +430,8 @@ public class Main {
 //                System.err.println("Cannot create a graph.");
 //            }
 //        }
+
+        testACO();
     }
 
 }

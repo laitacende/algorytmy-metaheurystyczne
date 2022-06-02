@@ -2,9 +2,9 @@ import org.junit.Test;
 import algorithms.ExtendedNearestNeighbour;
 import algorithms.KRandom;
 import org.junit.Assert;
-import structures.Graph;
-import utils.CostFunction;
-import utils.GraphCreator;
+import structures.tsp.Graph;
+import utils.graph.CostFunction;
+import utils.graph.GraphCreator;
 import java.util.List;
 
 public class KRandomTest {

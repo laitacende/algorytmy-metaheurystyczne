@@ -2,10 +2,10 @@ import org.junit.Test;
 import algorithms.ExtendedNearestNeighbour;
 import algorithms.NearestNeighbour;
 import org.junit.Assert;
-import structures.Graph;
-import utils.CostFunction;
-import utils.GraphCreator;
-import utils.GraphType;
+import structures.tsp.Graph;
+import utils.graph.CostFunction;
+import utils.graph.GraphCreator;
+import consts.GraphType;
 
 import java.util.List;
 

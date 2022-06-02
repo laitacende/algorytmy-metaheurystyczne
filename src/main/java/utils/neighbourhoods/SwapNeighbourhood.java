@@ -1,13 +1,15 @@
-package utils;
+package utils.neighbourhoods;
 
 import custom_exceptions.NoNewNeighbourException;
-import structures.Graph;
-import structures.TabuList;
+import structures.tsp.Graph;
+import structures.tabu.TabuList;
+import utils.graph.CostFunction;
+
 import java.util.ArrayList;
 import java.util.List;
 
 
-public class InvertNeighbourhood extends AbstractNeighbourhood {
+public class SwapNeighbourhood extends AbstractNeighbourhood  {
 
     @Override
     public List<Integer> getBestNeighbour(List<Integer> permutation, Graph graph, Integer[] indexes, TabuList tabuList,
@@ -22,28 +24,34 @@ public class InvertNeighbourhood extends AbstractNeighbourhood {
         size = initialPermutation.size();
         counter = Integer.MIN_VALUE;
 
-        // invert
+        // swap
         for (int i = 0; i < graph.vNo - 2; i++) { // don't consider the last node - there is nothing to invert
-            for (int j = i + 1; j < graph.vNo - 1; j++) { // check from position 'onwards'
+            for (int j = i + 1; j < size; j++) { // check from position 'onwards'
 
-                // change i and j and reverse everything between them
                 newPermutation = new ArrayList<>(initialPermutation);
                 newDistance = initialDistance;
 
-                // reverse
-                for (int k = 0; k <= j - i; k++) {
-                    newPermutation.set(i + k, initialPermutation.get(j - k));
+                // swap i and j
+                newPermutation.set(j, initialPermutation.get(i));
+                newPermutation.set(i, initialPermutation.get(j));
 
-                    // update distance live
-                    newDistance -= graph.getEdge(initialPermutation.get(Math.floorMod(j - k - 1, size)), initialPermutation.get(j - k));
-                    newDistance += j - k != i ? graph.getEdge(initialPermutation.get(j - k), initialPermutation.get(Math.floorMod(j - k - 1, size))) : 0;
+                // update distance
+                newDistance -= graph.getEdge(initialPermutation.get(Math.floorMod(i - 1, size)), initialPermutation.get(i));
+                newDistance -= graph.getEdge(initialPermutation.get(i), initialPermutation.get(Math.floorMod(i + 1, size)));
+                if (j != Math.floorMod(i + 1, size)) {
+                    newDistance -= graph.getEdge(initialPermutation.get(Math.floorMod(j - 1, size)), initialPermutation.get(j));
                 }
-                // update distance live
-                if (Math.floorMod(j + 1, size) != i) {
+                if (i != Math.floorMod(j + 1, size)) {
                     newDistance -= graph.getEdge(initialPermutation.get(j), initialPermutation.get(Math.floorMod(j + 1, size)));
-                    newDistance += graph.getEdge(newPermutation.get(j), newPermutation.get(Math.floorMod(j + 1, size)));
                 }
                 newDistance += graph.getEdge(newPermutation.get(Math.floorMod(i - 1, size)), newPermutation.get(i));
+                newDistance += graph.getEdge(newPermutation.get(i), newPermutation.get(Math.floorMod(i + 1, size)));
+                if (j != Math.floorMod(i + 1, size)) {
+                    newDistance += graph.getEdge(newPermutation.get(Math.floorMod(j - 1, size)), newPermutation.get(j));
+                }
+                if (i != Math.floorMod(j + 1, size)) {
+                    newDistance += graph.getEdge(newPermutation.get(j), newPermutation.get(Math.floorMod(j + 1, size)));
+                }
 
 
                 // if permutation is better than global best solution -  use regardless
@@ -77,6 +85,7 @@ public class InvertNeighbourhood extends AbstractNeighbourhood {
                 }
             }
         }
+
         // when no new neighbour found
         if (currentBestPermutation.equals(initialPermutation)) {
             throw new NoNewNeighbourException();

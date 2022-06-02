@@ -1,8 +1,8 @@
-package utils;
+package utils.neighbourhoods;
 
 import custom_exceptions.NoNewNeighbourException;
-import structures.Graph;
-import structures.TabuList;
+import structures.tsp.Graph;
+import structures.tabu.TabuList;
 import java.util.List;
 
 

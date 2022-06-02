@@ -1,4 +1,4 @@
-package structures;
+package structures.tsp;
 
 public class Coordinates {
     public Integer x;

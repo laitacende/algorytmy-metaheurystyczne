@@ -1,14 +1,13 @@
 package algorithms;
 
-import structures.Graph;
-import utils.CostFunction;
+import structures.tsp.Graph;
+import utils.graph.CostFunction;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class TwoOPT {
-    public static List<Integer> twoOpt(Graph g) {
+    public static List<Integer> twoOpt(Graph g, List<Integer> startPermutation) {
         List<Integer> currentPermutation = new ArrayList<>();
         List<Integer> newPermutation;
         Double currentDistance;
@@ -17,17 +16,11 @@ public class TwoOPT {
         List<Integer> newPermutationBest = new ArrayList<>();
         boolean improved = true;
 
-        // start with natural order (1, 2, ..., n)
-        for (int i = 1; i < g.vNo; i++) {
-            currentPermutation.add(i);
-        }
-
+        currentPermutation = startPermutation;
         currentDistance = CostFunction.calcCostFunction(currentPermutation, g);
 
         while (improved) {
-
             newDistanceBest = Double.MAX_VALUE;
-
             // invert
             for (int i = 0; i < g.vNo - 2; i++) { // don't consider the last node - there is nothing to invert
                 for (int j = i + 1; j < g.vNo - 1; j++) { // check from position 'onwards'
@@ -60,5 +53,24 @@ public class TwoOPT {
         }
 
         return currentPermutation;
+    }
+
+    public static List<Integer> twoOptExtended(Graph g) {
+        List<Integer> currentSolution, bestSolution;
+        Double currentDistance, bestDistance;
+
+        bestSolution = currentSolution = TwoOPT.twoOpt(g, NearestNeighbour.nearestNeighbour(g, 1));
+        bestDistance = currentDistance = CostFunction.calcCostFunction(currentSolution, g);
+
+        for (int i = 2; i < g.vNo; i++) {
+            currentSolution = TwoOPT.twoOpt(g, NearestNeighbour.nearestNeighbour(g, i));
+            currentDistance = CostFunction.calcCostFunction(currentSolution, g);
+
+            if (currentDistance < bestDistance) {
+                bestSolution = currentSolution;
+                bestDistance = currentDistance;
+            }
+        }
+        return bestSolution;
     }
 }

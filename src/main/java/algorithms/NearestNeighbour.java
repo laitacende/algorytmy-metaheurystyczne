@@ -1,6 +1,6 @@
 package algorithms;
 
-import structures.Graph;
+import structures.tsp.Graph;
 
 import java.util.ArrayList;
 import java.util.List;

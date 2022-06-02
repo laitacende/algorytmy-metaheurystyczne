@@ -1,7 +1,7 @@
 package algorithms;
 
-import structures.Graph;
-import utils.CostFunction;
+import structures.tsp.Graph;
+import utils.graph.CostFunction;
 
 import java.util.ArrayList;
 import java.util.List;

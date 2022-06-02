@@ -1,18 +1,17 @@
 package algorithms;
 
-import structures.Ant;
-import structures.Graph;
-import structures.Subcolony;
-import utils.IReinforcement;
-
+import consts.PheromoneUpdateType;
+import structures.aco.Ant;
+import structures.aco.Subcolony;
+import structures.tsp.Graph;
 import java.util.List;
 
 public class ACOParallel extends AbstractACO {
+    private final int numberOfSubcolonies;
     private Subcolony[] subcolonies;
-    private int numberOfSubcolonies = 5;
 
-    public ACOParallel(int number) {
-        numberOfSubcolonies = number;
+    public ACOParallel(int numberOfSubcolonies) {
+        this.numberOfSubcolonies = numberOfSubcolonies;
     }
 
     @Override
@@ -26,34 +25,30 @@ public class ACOParallel extends AbstractACO {
         for (int i = 0; i < numberOfSubcolonies; i++) {
             subcolonies[i] = new Subcolony(graph);
             for (int j = 0; j < size; j++) {
-                subcolonies[i].addAntToSubcolony(new Ant(1.0, graph.vNo));
+                subcolonies[i].addAntToSubcolony(new Ant(graph.vNo));
             }
         }
 
         int difference = (graph.vNo - 1) - size * numberOfSubcolonies;
-        if (difference != 0) { // add additional ants to the first subcolony
+        if (difference != 0) {
+            // add additional ants to the first subcolony
             for (int i = 0; i < difference; i++) {
-                subcolonies[0].addAntToSubcolony(new Ant(1.0, graph.vNo));
+                subcolonies[0].addAntToSubcolony(new Ant(graph.vNo));
             }
         }
     }
 
     @Override
-    void moveAnts(Graph graph, IReinforcement reinforcement) {
+    void moveAnts(Graph graph, PheromoneUpdateType updateType) {
         // set reinforcement strategy
-        for (Subcolony subcolony : subcolonies) {
-            subcolony.reinforcement = reinforcement;
-        }
+        for (Subcolony subcolony : subcolonies) { subcolony.updateType = updateType; }
         // start threads
-        for (Subcolony subcolony : subcolonies) {
-            subcolony.start();
-        }
+        for (Subcolony subcolony : subcolonies) { subcolony.start(); }
 
         // wait for every thread to finish
         for (Subcolony subcolony : subcolonies) {
-            try {
-                subcolony.join();
-            } catch (InterruptedException e) {
+            try { subcolony.join(); }
+            catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
@@ -72,7 +67,6 @@ public class ACOParallel extends AbstractACO {
                     bestTour = ant.trail;
                 }
             }
-
         }
 
         return bestTour;

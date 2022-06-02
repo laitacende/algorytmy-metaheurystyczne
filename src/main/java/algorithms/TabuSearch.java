@@ -1,35 +1,41 @@
 package algorithms;
 
+import consts.StopCondType;
+import consts.TabuRestartType;
 import custom_exceptions.NoNewNeighbourException;
-import structures.BacktrackList;
-import structures.Graph;
-import structures.TabuList;
-import utils.*;
+import structures.tabu.BacktrackList;
+import structures.tsp.Graph;
+import structures.tabu.TabuList;
+import utils.graph.CostFunction;
+import utils.neighbourhoods.AbstractNeighbourhood;
+import utils.neighbourhoods.InsertNeighbourhood;
+import utils.neighbourhoods.InvertNeighbourhood;
+import utils.neighbourhoods.SwapNeighbourhood;
+
 import java.util.List;
-import java.util.Random;
 
 public class TabuSearch {
     private static final int TABU_SIZE = 13;
 
     // tabu search with extended neighbour result
-    public static  List<Integer> tabuSearchENN(Graph graph,AbstractNeighbourhood neighbourhood, TabuStopCondType stopCondType, TabuRestartType restartType, int tabuSize,
+    public static  List<Integer> tabuSearchENN(Graph graph, AbstractNeighbourhood neighbourhood, StopCondType stopCondType, TabuRestartType restartType, int tabuSize,
                                                int stopCondVal, int improvementPercent, int postImprovementCount, int backtrackMoves, boolean changeNeighbourhood) {
         List<Integer> startTour = ExtendedNearestNeighbour.extendedNearestNeighbour(graph);
         return tabuSearch(graph, startTour, neighbourhood, stopCondType, restartType, tabuSize, stopCondVal, improvementPercent, postImprovementCount, backtrackMoves, changeNeighbourhood);
     }
 
-    public static  List<Integer> tabuSearchENN(Graph graph, TabuStopCondType stopCondType) {
+    public static  List<Integer> tabuSearchENN(Graph graph, StopCondType stopCondType) {
         return tabuSearchENN(graph, new InvertNeighbourhood(), stopCondType, TabuRestartType.NEIGHBOUR,
                 15, 10 * graph.vNo, 3, 100, 2, true);
     }
 
     public static  List<Integer> tabuSearchENN(Graph graph, int tabuSize, int improvementPercent, int backtrackMoves, boolean changeN) {
-        return tabuSearchENN(graph, new InvertNeighbourhood(), TabuStopCondType.ITERATIONS_AMOUNT, TabuRestartType.NEIGHBOUR,
+        return tabuSearchENN(graph, new InvertNeighbourhood(), StopCondType.ITERATIONS_AMOUNT, TabuRestartType.NEIGHBOUR,
                 tabuSize, 10 * graph.vNo, improvementPercent, 100, backtrackMoves, changeN);
     }
 
     public static  List<Integer> tabuSearchENN(Graph graph, boolean changeN, int tabuSize) {
-        return tabuSearchENN(graph, new InvertNeighbourhood(), TabuStopCondType.ITERATIONS_AMOUNT, TabuRestartType.BACKTRACK,
+        return tabuSearchENN(graph, new InvertNeighbourhood(), StopCondType.ITERATIONS_AMOUNT, TabuRestartType.BACKTRACK,
                 tabuSize, 10 * graph.vNo, 3, 500, 2, changeN);
     }
 
@@ -37,13 +43,13 @@ public class TabuSearch {
     // tabu search with KRandom result
     public static  List<Integer> tabuSearchKR(Graph graph, AbstractNeighbourhood neighbourhood, TabuRestartType restartType, boolean changeNeighbourhood) {
         List<Integer> startTour = KRandom.generateRandomCycle(graph);
-        return tabuSearch(graph, startTour, neighbourhood, TabuStopCondType.ITERATIONS_AMOUNT, restartType,
+        return tabuSearch(graph, startTour, neighbourhood, StopCondType.ITERATIONS_AMOUNT, restartType,
                 13, 10 * graph.vNo, 100, 50, 2, changeNeighbourhood);
     }
 
 
 
-    public static  List<Integer> tabuSearch(Graph graph, List<Integer> startTour, AbstractNeighbourhood neighbourhood, TabuStopCondType stopCondType, TabuRestartType restartType,
+    public static  List<Integer> tabuSearch(Graph graph, List<Integer> startTour, AbstractNeighbourhood neighbourhood, StopCondType stopCondType, TabuRestartType restartType,
                                             int tabuSize, int stopCondVal, int improvementPercent, int postImprovementCount, int backtrackMoves, boolean changeNeighbourhood) {
 
         //Random rand = new Random();
@@ -153,7 +159,7 @@ public class TabuSearch {
                 noImprovementCounter++;
 
                 // When no good solution found in a really long time
-                if (noImprovementCounter > stopCondVal / 5 && stopCondType != TabuStopCondType.NO_IMPROVEMENT) {
+                if (noImprovementCounter > stopCondVal / 5 && stopCondType != StopCondType.NO_IMPROVEMENT) {
                     // reset counter
                     noImprovementCounter = 0;
 

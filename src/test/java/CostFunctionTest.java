@@ -1,8 +1,8 @@
 import org.junit.Test;
 import static org.junit.Assert.*;
-import structures.Graph;
-import utils.CostFunction;
-import utils.GraphType;
+import structures.tsp.Graph;
+import utils.graph.CostFunction;
+import consts.GraphType;
 
 import java.util.ArrayList;
 

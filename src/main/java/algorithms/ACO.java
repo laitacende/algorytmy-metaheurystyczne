@@ -1,58 +1,44 @@
 package algorithms;
 
-import structures.Ant;
-import structures.Graph;
-import utils.IReinforcement;
-import utils.OnlineDelayedReinforcement;
-import utils.OnlineStepByStepReinforcement;
-
+import consts.PheromoneUpdateType;
+import structures.aco.Ant;
+import structures.tsp.Graph;
+import utils.pheromone_updates.PheromoneUpdate;
 import java.util.ArrayList;
 import java.util.List;
 
 // Ant Colony Optimization
 public class ACO extends AbstractACO {
-
     @Override
     public void initializeAnts(Graph graph, double antsFactor) {
         // create ants
-        if (ants == null)
-            ants = new Ant[(int) ((graph.vNo - 1) * antsFactor)];
-            //ants = new Ant[1];
-        // give each ant a random starting point
-        for (int i = 0; i < ants.length; i++) {
-            ants[i] = new Ant(1.0, graph.vNo); // TODO find out amount of pheromones
-            ants[i].resetAnt();
-            ants[i].addCityToTrail(mt.nextInt(graph.vNo - 1) + 1, graph);
+        ants = new ArrayList<>();
+        for (int i = 0; i < ((graph.vNo - 1) *  antsFactor); i++) {
+            ants.add(new Ant(graph, (mt.nextInt(graph.vNo - 1) + 1)));
         }
     }
 
     @Override
-    public void moveAnts(Graph graph, IReinforcement reinforcement) {
+    public void moveAnts(Graph graph, PheromoneUpdateType updateType) {
         for (Ant ant : ants) {
             for (int i = 0; i < graph.vNo; i++) {
                 ant.goToNextCity(graph);
-                if (reinforcement instanceof OnlineStepByStepReinforcement) {
-                    reinforcement.updatePheromones(ant, graph);
+                if (updateType == PheromoneUpdateType.BY_STEP) {
+                    PheromoneUpdate.updatePheromones(updateType, graph, ant, null, false);
                 }
             }
-            if (reinforcement instanceof OnlineDelayedReinforcement) {
-                reinforcement.updatePheromones(ant, graph);
+            if (updateType == PheromoneUpdateType.DELAYED) {
+                PheromoneUpdate.updatePheromones(updateType, graph, ant, null, false);
             }
         }
-//        if (reinforcement instanceof OnlineDelayedReinforcement) {
-//            for (Ant ant : ants) {
-//                for (int i = 0; i < graph.vNo; i++) {
-//                    ant.goToNextCity(graph);
-//                }
-//                reinforcement.updatePheromones(ant, graph);
-//            }
-//        } else {
-//            for (int i = 0; i < graph.vNo; i++) {
-//                for (Ant ant : ants) {
-//                    ant.goToNextCity(graph);
-//                }
-//            }
-//        }
+
+        if (updateType == PheromoneUpdateType.ELITIST) {
+            PheromoneUpdate.updatePheromones(updateType, graph, null, ants, false);
+        }
+
+        if (updateType == PheromoneUpdateType.BY_RANK) {
+            PheromoneUpdate.updatePheromones(updateType, graph, null, ants, false);
+        }
     }
 
     @Override
@@ -68,5 +54,4 @@ public class ACO extends AbstractACO {
         }
         return bestTour;
     }
-
 }

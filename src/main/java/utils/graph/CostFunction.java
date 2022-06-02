@@ -1,5 +1,5 @@
-package utils;
-import structures.Graph;
+package utils.graph;
+import structures.tsp.Graph;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
