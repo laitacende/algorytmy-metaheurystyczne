@@ -21,7 +21,7 @@ public abstract class AbstractACO {
      *
      */
     public List<Integer> antColonyOptimization(Graph graph, double antsFactor, double rho, StopCondType stopCondType,
-                                               int stopCondVal, PheromoneUpdateType updateType) {
+                                               int stopCondVal, PheromoneUpdateType updateType, int k) {
 
         List<Integer> bestTour = new ArrayList<>();
         double bestDistance = Double.MAX_VALUE;
@@ -35,8 +35,8 @@ public abstract class AbstractACO {
         initializePheromones(graph);
 
         while (true) {
-            initializeAnts(graph, antsFactor);
-            moveAnts(graph, updateType);
+            initializeAnts(graph, antsFactor, k);
+            moveAnts(graph, updateType, k);
             evaporatePheromones(graph, rho);
 
             // get best tour from ants
@@ -81,9 +81,9 @@ public abstract class AbstractACO {
         }
     }
 
-    public abstract void initializeAnts(Graph graph, double antsFactor);
+    public abstract void initializeAnts(Graph graph, double antsFactor, int k);
 
-    abstract void moveAnts(Graph graph, PheromoneUpdateType updateType);
+    abstract void moveAnts(Graph graph, PheromoneUpdateType updateType, int k);
 
     abstract List<Integer> getBestTour();
 }

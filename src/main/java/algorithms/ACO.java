@@ -10,7 +10,7 @@ import java.util.List;
 // Ant Colony Optimization
 public class ACO extends AbstractACO {
     @Override
-    public void initializeAnts(Graph graph, double antsFactor) {
+    public void initializeAnts(Graph graph, double antsFactor, int k) {
         // create ants
         ants = new ArrayList<>();
         for (int i = 0; i < ((graph.vNo - 1) *  antsFactor); i++) {
@@ -19,25 +19,25 @@ public class ACO extends AbstractACO {
     }
 
     @Override
-    public void moveAnts(Graph graph, PheromoneUpdateType updateType) {
+    public void moveAnts(Graph graph, PheromoneUpdateType updateType, int k) {
         for (Ant ant : ants) {
             for (int i = 0; i < graph.vNo; i++) {
                 ant.goToNextCity(graph);
                 if (updateType == PheromoneUpdateType.BY_STEP) {
-                    PheromoneUpdate.updatePheromones(updateType, graph, ant, null, false);
+                    PheromoneUpdate.updatePheromones(updateType, graph, ant, null, false, 0);
                 }
             }
             if (updateType == PheromoneUpdateType.DELAYED) {
-                PheromoneUpdate.updatePheromones(updateType, graph, ant, null, false);
+                PheromoneUpdate.updatePheromones(updateType, graph, ant, null, false, 0);
             }
         }
 
         if (updateType == PheromoneUpdateType.ELITIST) {
-            PheromoneUpdate.updatePheromones(updateType, graph, null, ants, false);
+            PheromoneUpdate.updatePheromones(updateType, graph, null, ants, false, 0);
         }
 
         if (updateType == PheromoneUpdateType.BY_RANK) {
-            PheromoneUpdate.updatePheromones(updateType, graph, null, ants, false);
+            PheromoneUpdate.updatePheromones(updateType, graph, null, ants, false, k);
         }
     }
 

@@ -15,7 +15,7 @@ public class ACOParallel extends AbstractACO {
     }
 
     @Override
-    public void initializeAnts(Graph graph, double antsFactor) {
+    public void initializeAnts(Graph graph, double antsFactor, int k) {
         if (subcolonies == null) {
             // create subcolonies
             subcolonies = new Subcolony[numberOfSubcolonies];
@@ -23,7 +23,7 @@ public class ACOParallel extends AbstractACO {
         int size = (int) ((graph.vNo - 1) * antsFactor) / numberOfSubcolonies;
         // add equal number of ants to subcolonies
         for (int i = 0; i < numberOfSubcolonies; i++) {
-            subcolonies[i] = new Subcolony(graph);
+            subcolonies[i] = new Subcolony(graph, k);
             for (int j = 0; j < size; j++) {
                 subcolonies[i].addAntToSubcolony(new Ant(graph.vNo));
             }
@@ -39,7 +39,7 @@ public class ACOParallel extends AbstractACO {
     }
 
     @Override
-    void moveAnts(Graph graph, PheromoneUpdateType updateType) {
+    void moveAnts(Graph graph, PheromoneUpdateType updateType, int k) {
         // set reinforcement strategy
         for (Subcolony subcolony : subcolonies) { subcolony.updateType = updateType; }
         // start threads

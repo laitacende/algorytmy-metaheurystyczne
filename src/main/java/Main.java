@@ -368,7 +368,7 @@ public class Main {
         ACOParallel acoPll = new ACOParallel(5);
 //        List<Integer> solutionACO = aco.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 1000, PheromoneUpdateType.DELAYED);
 //        List<Integer> solutionACOel = aco.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 1000, PheromoneUpdateType.BY_RANK);
-        List<Integer> solutionACOPll = acoPll.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 500, PheromoneUpdateType.BY_RANK);
+        List<Integer> solutionACOPll = acoPll.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 500, PheromoneUpdateType.BY_RANK, 1);
         List<Integer> solutionTabu = TabuSearch.tabuSearchENN(graph, StopCondType.ITERATIONS_AMOUNT);
         List<Integer> solutionOPT = TwoOPT.twoOpt(graph, KRandom.generateRandomCycle(graph));
         List<Integer> solutionOPT_EXT = TwoOPT.twoOptExtended(graph);

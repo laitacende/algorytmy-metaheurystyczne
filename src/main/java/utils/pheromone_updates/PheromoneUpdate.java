@@ -13,11 +13,11 @@ import java.util.List;
 public class PheromoneUpdate {
     public static void updatePheromones(
             PheromoneUpdateType updateType, Graph graph,
-            Ant ant, ArrayList<Ant> ants, boolean delWorst
+            Ant ant, ArrayList<Ant> ants, boolean delWorst, int k
     ) {
         switch (updateType) {
             case ELITIST -> elitistUpdate(graph, ants, delWorst); // offline
-            case BY_RANK -> rankBasedUpdate(graph, ants, delWorst); // offline
+            case BY_RANK -> rankBasedUpdate(graph, ants, delWorst, k); // offline
             case BY_STEP -> byStepUpdate(graph, ant); // online
             case DELAYED -> delayedUpdate(graph, ant); // online
         }
@@ -62,16 +62,23 @@ public class PheromoneUpdate {
     }
 
 
-    private static void rankBasedUpdate(Graph graph, ArrayList<Ant> ants, boolean delWorst) {
+    private static void rankBasedUpdate(Graph graph, ArrayList<Ant> ants, boolean delWorst, int k) {
         ants.sort(Comparator.comparingDouble(ant -> ant.trailLength));
 
-        int rank = ants.size();
-        for (Ant ant : ants) {
-            double amount = (ant.trailLength > 0.0) ? (rank * (1.0 / ant.trailLength)) : 0.0;
-            for (int i = 0; i < ant.trail.size(); i++) {
-                graph.increasePheromonesOnEdge(amount, ant.trail.get(i), ant.trail.get((i + 1) % ant.trail.size()));
+//        int rank = ants.size();
+//        for (Ant ant : ants) {
+//            double amount = (ant.trailLength > 0.0) ? (rank * (1.0 / ant.trailLength)) : 0.0;
+//            for (int i = 0; i < ant.trail.size(); i++) {
+//                graph.increasePheromonesOnEdge(amount, ant.trail.get(i), ant.trail.get((i + 1) % ant.trail.size()));
+//            }
+//            rank --;
+//        }
+
+        for (int j = 0; j < k; j++) {
+            double amount = (ants.get(j).trailLength > 0.0) ? (j * (1.0 / ants.get(j).trailLength)) : 0.0;
+            for (int i = 0; i < ants.get(i).trail.size(); i++) {
+                graph.increasePheromonesOnEdge(amount, ants.get(i).trail.get(i), ants.get(i).trail.get((i + 1) % ants.get(i).trail.size()));
             }
-            rank --;
         }
 
         if (delWorst) {
