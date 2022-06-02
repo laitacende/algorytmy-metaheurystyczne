@@ -76,8 +76,8 @@ public class PheromoneUpdate {
 
         for (int j = 0; j < k; j++) {
             double amount = (ants.get(j).trailLength > 0.0) ? (j * (1.0 / ants.get(j).trailLength)) : 0.0;
-            for (int i = 0; i < ants.get(i).trail.size(); i++) {
-                graph.increasePheromonesOnEdge(amount, ants.get(i).trail.get(i), ants.get(i).trail.get((i + 1) % ants.get(i).trail.size()));
+            for (int i = 0; i < ants.get(j).trail.size(); i++) {
+                graph.increasePheromonesOnEdge(amount, ants.get(j).trail.get(i), ants.get(j).trail.get((i + 1) % ants.get(j).trail.size()));
             }
         }
 
