@@ -116,7 +116,7 @@ public class Main {
             }
             try {
                 assert fileWriter != null;
-                fileWriter.write(antsFactor + " " +
+                fileWriter.write(threads + " " +
                                 (avgElitist / 25) + " " + (timeElitist / 25) + " " +
                                 (avgElitistP / 25) + " " + (timeElitistP / 25) +
                         "\n");
