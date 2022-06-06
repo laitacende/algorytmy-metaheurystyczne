@@ -12,6 +12,7 @@ public class Subcolony extends Thread {
     public ArrayList<Ant> subAnts;
     public PheromoneUpdateType updateType;
     private final MersenneTwister mt = new MersenneTwister();
+    public double max = 1.0;
     public int k;
 
 
@@ -26,30 +27,30 @@ public class Subcolony extends Thread {
         subAnts.add(ant);
     }
 
-    private void moveAnts(int k) {
+    private void moveAnts(int k, double max) {
         for (Ant ant : subAnts) {
             for (int i = 0; i < graph.vNo; i++) {
                 ant.goToNextCity(graph);
                 if (updateType == PheromoneUpdateType.BY_STEP) {
-                    PheromoneUpdate.updatePheromones(updateType, graph, ant, null, false, 0);
+                    PheromoneUpdate.updatePheromones(updateType, graph, ant, null, 0, max, false);
                 }
             }
             if (updateType == PheromoneUpdateType.DELAYED) {
-                PheromoneUpdate.updatePheromones(updateType, graph, ant, null, false, 0);
+                PheromoneUpdate.updatePheromones(updateType, graph, ant, null, 0, max, false);
             }
         }
 
         if (updateType == PheromoneUpdateType.ELITIST) {
-            PheromoneUpdate.updatePheromones(updateType, graph, null, subAnts, false, 0);
+            PheromoneUpdate.updatePheromones(updateType, graph, null, subAnts, 0, max,false);
         }
 
         if (updateType == PheromoneUpdateType.BY_RANK) {
-            PheromoneUpdate.updatePheromones(updateType, graph, null, subAnts, false, k);
+            PheromoneUpdate.updatePheromones(updateType, graph, null, subAnts, k, max, false);
         }
     }
 
     @Override
     public void run() {
-        moveAnts(k);
+        moveAnts(k, max);
     }
 }

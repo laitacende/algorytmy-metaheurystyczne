@@ -39,9 +39,12 @@ public class ACOParallel extends AbstractACO {
     }
 
     @Override
-    void moveAnts(Graph graph, PheromoneUpdateType updateType, int k) {
+    void moveAnts(Graph graph, PheromoneUpdateType updateType, int k, double max) {
         // set reinforcement strategy
-        for (Subcolony subcolony : subcolonies) { subcolony.updateType = updateType; }
+        for (Subcolony subcolony : subcolonies) {
+            subcolony.updateType = updateType;
+            subcolony.max = max;
+        }
         // start threads
         for (Subcolony subcolony : subcolonies) { subcolony.start(); }
 

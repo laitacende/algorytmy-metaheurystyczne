@@ -19,25 +19,25 @@ public class ACO extends AbstractACO {
     }
 
     @Override
-    public void moveAnts(Graph graph, PheromoneUpdateType updateType, int k) {
+    public void moveAnts(Graph graph, PheromoneUpdateType updateType, int k, double max) {
         for (Ant ant : ants) {
             for (int i = 0; i < graph.vNo; i++) {
                 ant.goToNextCity(graph);
                 if (updateType == PheromoneUpdateType.BY_STEP) {
-                    PheromoneUpdate.updatePheromones(updateType, graph, ant, null, false, 0);
+                    PheromoneUpdate.updatePheromones(updateType, graph, ant, null, 0, max, false);
                 }
             }
             if (updateType == PheromoneUpdateType.DELAYED) {
-                PheromoneUpdate.updatePheromones(updateType, graph, ant, null, false, 0);
+                PheromoneUpdate.updatePheromones(updateType, graph, ant, null, 0, max, false);
             }
         }
 
         if (updateType == PheromoneUpdateType.ELITIST) {
-            PheromoneUpdate.updatePheromones(updateType, graph, null, ants, false, 0);
+            PheromoneUpdate.updatePheromones(updateType, graph, null, ants, 0, max, false);
         }
 
         if (updateType == PheromoneUpdateType.BY_RANK) {
-            PheromoneUpdate.updatePheromones(updateType, graph, null, ants, false, k);
+            PheromoneUpdate.updatePheromones(updateType, graph, null, ants, k,  max,  false);
         }
     }
 

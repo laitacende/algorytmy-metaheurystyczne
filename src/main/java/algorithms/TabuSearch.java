@@ -26,7 +26,7 @@ public class TabuSearch {
 
     public static  List<Integer> tabuSearchENN(Graph graph, StopCondType stopCondType) {
         return tabuSearchENN(graph, new InvertNeighbourhood(), stopCondType, TabuRestartType.NEIGHBOUR,
-                15, 10 * graph.vNo, 3, 100, 2, true);
+                (int) (1.2 * graph.vNo), 1000, 3, 100, 2, true);
     }
 
     public static  List<Integer> tabuSearchENN(Graph graph, int tabuSize, int improvementPercent, int backtrackMoves, boolean changeN) {

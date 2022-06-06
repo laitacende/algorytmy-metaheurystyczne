@@ -365,21 +365,18 @@ public class Main {
     public static void testACO() {
         Graph graph = GraphCreator.randomEuclidean(50, 10000);
         ACO aco = new ACO();
-        ACOParallel acoPll = new ACOParallel(5);
-//        List<Integer> solutionACO = aco.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 1000, PheromoneUpdateType.DELAYED);
-//        List<Integer> solutionACOel = aco.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 1000, PheromoneUpdateType.BY_RANK);
-        List<Integer> solutionACOPll = acoPll.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 500, PheromoneUpdateType.BY_RANK, 1);
+        ACOParallel acoPll = new ACOParallel(7);
+        List<Integer> solutionACOel = aco.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 1000, PheromoneUpdateType.BY_RANK, (int) (0.2 * graph.vNo), false, true);
+        List<Integer> solutionACOPll = acoPll.antColonyOptimization(graph, 1, 0.5, StopCondType.ITERATIONS_AMOUNT, 1000, PheromoneUpdateType.BY_RANK, (int) (0.2 * graph.vNo),true, true);
         List<Integer> solutionTabu = TabuSearch.tabuSearchENN(graph, StopCondType.ITERATIONS_AMOUNT);
         List<Integer> solutionOPT = TwoOPT.twoOpt(graph, KRandom.generateRandomCycle(graph));
         List<Integer> solutionOPT_EXT = TwoOPT.twoOptExtended(graph);
 
-
-//        System.out.println(CostFunction.calcCostFunction(solutionACO, graph));
-//        System.out.println(CostFunction.calcCostFunction(solutionACOel, graph));
-        System.out.println(CostFunction.calcCostFunction(solutionACOPll, graph));
-        System.out.println(CostFunction.calcCostFunction(solutionOPT, graph));
-        System.out.println(CostFunction.calcCostFunction(solutionTabu, graph));
-        System.out.println(CostFunction.calcCostFunction(solutionOPT_EXT, graph));
+        System.out.println("elitist basic ACO : " + CostFunction.calcCostFunction(solutionACOel, graph));
+        System.out.println("ACO + 2OPT : " + CostFunction.calcCostFunction(solutionACOPll, graph));
+        System.out.println("2OPT basic : " + CostFunction.calcCostFunction(solutionOPT, graph));
+        System.out.println("Tabu : " + CostFunction.calcCostFunction(solutionTabu, graph));
+        System.out.println("2OPT + ENN : " + CostFunction.calcCostFunction(solutionOPT_EXT, graph));
     }
 
     public static void main(String[] args) {
@@ -430,7 +427,6 @@ public class Main {
 //                System.err.println("Cannot create a graph.");
 //            }
 //        }
-
         testACO();
     }
 
